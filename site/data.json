@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-22 02:19",
+ "generated_at": "2026-11-22 22:14",
  "assets": [
   {
    "id": "kospi200",
@@ -14,15 +14,15 @@
    "kind": "morning",
    "prev_close": 755.34,
    "pred": {
-    "open": 730.9,
-    "high": 747.75,
-    "low": 716.26
+    "open": 730.65,
+    "high": 747.46,
+    "low": 715.91
    },
    "pred_pct": {
-    "open": -3.236,
-    "high": -1.005,
-    "low": -5.174,
-    "close": -2.945
+    "open": -3.269,
+    "high": -1.043,
+    "low": -5.22,
+    "close": -2.995
    },
    "drivers": [
     {
@@ -43,7 +43,7 @@
     },
     {
      "name": "원/달러 환율",
-     "ret": 0.33
+     "ret": 0.556
     }
    ],
    "stats": {
@@ -861,20 +861,20 @@
    "today": null,
    "mid_stats": {
     "days": 250,
-    "up_rate": 30.8,
-    "dn_rate": 35.2,
-    "up_acc": 81.2,
-    "dn_acc": 75.6,
-    "up_gain": 37.7,
-    "dn_gain": 28.3,
+    "up_rate": 31.2,
+    "dn_rate": 34.8,
+    "up_acc": 80.4,
+    "dn_acc": 74.8,
+    "up_gain": 36.7,
+    "dn_gain": 27.9,
     "band_cover": 74.8,
-    "mae_close": 1.138,
-    "base_mae_close": 1.106,
+    "mae_close": 1.134,
+    "base_mae_close": 1.102,
     "without_morning": {
-     "up_acc": 80.8,
-     "dn_acc": 75.6,
-     "up_gain": 37.0,
-     "dn_gain": 28.5,
+     "up_acc": 80.4,
+     "dn_acc": 74.8,
+     "up_gain": 36.2,
+     "dn_gain": 28.0,
      "band_cover": 73.2
     }
    },
@@ -895,20 +895,7 @@
     "big_mae_high": 1.492,
     "big_mae_low": 1.302
    },
-   "live": [
-    {
-     "date": "2026-11-20",
-     "o_open": 765.72,
-     "o_high": 777.56,
-     "o_low": 752.24,
-     "o_band_high": 802.98,
-     "o_band_low": 723.6,
-     "a_open": 766.84,
-     "a_high": 772.09,
-     "a_low": 749.15,
-     "a_close": 755.34
-    }
-   ],
+   "live": [],
    "expiry": [
     {
      "key": "weekly_mon",
@@ -961,15 +948,15 @@
    "kind": "morning",
    "prev_close": 183100,
    "pred": {
-    "open": 175200,
+    "open": 175100,
     "high": 181900,
-    "low": 172400
+    "low": 172300
    },
    "pred_pct": {
-    "open": -4.338,
-    "high": -0.631,
-    "low": -5.86,
-    "close": -3.342
+    "open": -4.355,
+    "high": -0.636,
+    "low": -5.88,
+    "close": -3.353
    },
    "drivers": [
     {
@@ -998,7 +985,7 @@
     },
     {
      "name": "원/달러 환율",
-     "ret": 0.33
+     "ret": 0.556
     }
    ],
    "stats": {
@@ -1817,19 +1804,19 @@
    "mid_stats": {
     "days": 250,
     "up_rate": 26.0,
-    "dn_rate": 36.0,
-    "up_acc": 78.8,
-    "dn_acc": 76.8,
-    "up_gain": 24.8,
-    "dn_gain": 26.2,
-    "band_cover": 77.6,
-    "mae_close": 1.371,
-    "base_mae_close": 1.351,
+    "dn_rate": 35.6,
+    "up_acc": 78.4,
+    "dn_acc": 75.2,
+    "up_gain": 25.4,
+    "dn_gain": 25.2,
+    "band_cover": 77.2,
+    "mae_close": 1.363,
+    "base_mae_close": 1.342,
     "without_morning": {
-     "up_acc": 79.2,
-     "dn_acc": 75.6,
-     "up_gain": 25.4,
-     "dn_gain": 25.9,
+     "up_acc": 79.6,
+     "dn_acc": 75.2,
+     "up_gain": 26.0,
+     "dn_gain": 24.9,
      "band_cover": 76.4
     }
    },
@@ -1850,20 +1837,7 @@
     "big_mae_high": 1.657,
     "big_mae_low": 1.415
    },
-   "live": [
-    {
-     "date": "2026-11-20",
-     "o_open": 188100,
-     "o_high": 192300,
-     "o_low": 186500,
-     "o_band_high": 196400,
-     "o_band_low": 178400,
-     "a_open": 188100,
-     "a_high": 189300,
-     "a_low": 181400,
-     "a_close": 183100
-    }
-   ],
+   "live": [],
    "expiry": [
     {
      "key": "weekly_mon",
@@ -1918,13 +1892,13 @@
    "pred": {
     "open": 1028000,
     "high": 1072000,
-    "low": 1003000
+    "low": 1002000
    },
    "pred_pct": {
-    "open": -7.599,
-    "high": -3.674,
-    "low": -9.913,
-    "close": -6.835
+    "open": -7.628,
+    "high": -3.694,
+    "low": -9.952,
+    "close": -6.87
    },
    "drivers": [
     {
@@ -1953,7 +1927,7 @@
     },
     {
      "name": "원/달러 환율",
-     "ret": 0.33
+     "ret": 0.556
     }
    ],
    "stats": {
@@ -2771,21 +2745,21 @@
    "today": null,
    "mid_stats": {
     "days": 250,
-    "up_rate": 27.2,
+    "up_rate": 27.6,
     "dn_rate": 34.4,
-    "up_acc": 77.6,
-    "dn_acc": 72.8,
-    "up_gain": 25.2,
-    "dn_gain": 24.5,
-    "band_cover": 73.2,
-    "mae_close": 1.815,
-    "base_mae_close": 1.811,
+    "up_acc": 76.8,
+    "dn_acc": 72.4,
+    "up_gain": 23.6,
+    "dn_gain": 24.3,
+    "band_cover": 72.4,
+    "mae_close": 1.818,
+    "base_mae_close": 1.805,
     "without_morning": {
-     "up_acc": 74.8,
+     "up_acc": 74.4,
      "dn_acc": 72.8,
-     "up_gain": 23.0,
-     "dn_gain": 24.0,
-     "band_cover": 73.2
+     "up_gain": 21.7,
+     "dn_gain": 23.8,
+     "band_cover": 72.4
     }
    },
    "open_stats": {
@@ -2805,20 +2779,7 @@
     "big_mae_high": 2.042,
     "big_mae_low": 1.686
    },
-   "live": [
-    {
-     "date": "2026-11-20",
-     "o_open": 1117000,
-     "o_high": 1154000,
-     "o_low": 1100000,
-     "o_band_high": 1203000,
-     "o_band_low": 1044000,
-     "a_open": 1117000,
-     "a_high": 1124000,
-     "a_low": 1096000,
-     "a_close": 1113000
-    }
-   ],
+   "live": [],
    "expiry": [
     {
      "key": "weekly_mon",
@@ -2876,10 +2837,10 @@
     "low": 700000
    },
    "pred_pct": {
-    "open": -5.08,
-    "high": 0.112,
-    "low": -9.559,
-    "close": -4.702
+    "open": -5.09,
+    "high": 0.149,
+    "low": -9.574,
+    "close": -4.692
    },
    "drivers": [
     {
@@ -2904,7 +2865,7 @@
     },
     {
      "name": "원/달러 환율",
-     "ret": 0.33
+     "ret": 0.556
     }
    ],
    "stats": {
@@ -3722,21 +3683,21 @@
    "today": null,
    "mid_stats": {
     "days": 250,
-    "up_rate": 23.6,
-    "dn_rate": 27.6,
-    "up_acc": 82.0,
+    "up_rate": 24.0,
+    "dn_rate": 27.2,
+    "up_acc": 80.8,
     "dn_acc": 83.2,
-    "up_gain": 24.2,
-    "dn_gain": 34.4,
+    "up_gain": 22.6,
+    "dn_gain": 34.0,
     "band_cover": 77.6,
-    "mae_close": 1.66,
+    "mae_close": 1.659,
     "base_mae_close": 1.646,
     "without_morning": {
      "up_acc": 81.2,
-     "dn_acc": 81.6,
-     "up_gain": 24.5,
-     "dn_gain": 36.1,
-     "band_cover": 77.2
+     "dn_acc": 82.0,
+     "up_gain": 23.3,
+     "dn_gain": 35.8,
+     "band_cover": 77.6
     }
    },
    "open_stats": {
@@ -3756,20 +3717,7 @@
     "big_mae_high": 3.375,
     "big_mae_low": 3.092
    },
-   "live": [
-    {
-     "date": "2026-11-20",
-     "o_open": 821000,
-     "o_high": 854000,
-     "o_low": 797000,
-     "o_band_high": 905000,
-     "o_band_low": 741000,
-     "a_open": 821000,
-     "a_high": 832000,
-     "a_low": 768000,
-     "a_close": 774000
-    }
-   ],
+   "live": [],
    "expiry": [
     {
      "key": "weekly_mon",
@@ -3827,10 +3775,10 @@
     "low": 241000
    },
    "pred_pct": {
-    "open": -3.755,
-    "high": -0.674,
-    "low": -5.565,
-    "close": -2.838
+    "open": -3.749,
+    "high": -0.671,
+    "low": -5.571,
+    "close": -2.841
    },
    "drivers": [
     {
@@ -3855,7 +3803,7 @@
     },
     {
      "name": "원/달러 환율",
-     "ret": 0.33
+     "ret": 0.556
     }
    ],
    "stats": {
@@ -4674,20 +4622,20 @@
    "mid_stats": {
     "days": 250,
     "up_rate": 20.0,
-    "dn_rate": 36.0,
-    "up_acc": 80.4,
+    "dn_rate": 35.6,
+    "up_acc": 81.2,
     "dn_acc": 80.4,
-    "up_gain": 21.7,
-    "dn_gain": 38.0,
-    "band_cover": 82.8,
-    "mae_close": 1.196,
-    "base_mae_close": 1.158,
+    "up_gain": 19.9,
+    "dn_gain": 37.6,
+    "band_cover": 82.4,
+    "mae_close": 1.198,
+    "base_mae_close": 1.159,
     "without_morning": {
      "up_acc": 81.2,
      "dn_acc": 80.0,
-     "up_gain": 21.6,
-     "dn_gain": 38.5,
-     "band_cover": 82.8
+     "up_gain": 19.5,
+     "dn_gain": 38.2,
+     "band_cover": 83.2
     }
    },
    "open_stats": {
@@ -4707,20 +4655,7 @@
     "big_mae_high": 1.995,
     "big_mae_low": 1.918
    },
-   "live": [
-    {
-     "date": "2026-11-20",
-     "o_open": 258500,
-     "o_high": 263000,
-     "o_low": 254500,
-     "o_band_high": 269500,
-     "o_band_low": 245500,
-     "a_open": 258500,
-     "a_high": 263000,
-     "a_low": 252500,
-     "a_close": 255000
-    }
-   ],
+   "live": [],
    "expiry": [
     {
      "key": "weekly_mon",
@@ -5257,11 +5192,11 @@
    {
     "name": "WTI 유가",
     "unit": "달러",
-    "value": 83.98,
+    "value": 83.41,
     "date": "2026-11-20",
-    "chg": 0.77,
-    "chg_pct": 0.925,
-    "chg_20": -18.679,
+    "chg": 0.2,
+    "chg_pct": 0.24,
+    "chg_20": -19.231,
     "history": [
      [
       "06/03",
@@ -5741,18 +5676,18 @@
      ],
      [
       "11/20",
-      83.98
+      83.41
      ]
     ]
    },
    {
     "name": "브렌트 유가",
     "unit": "달러",
-    "value": 92.57,
+    "value": 89.95,
     "date": "2026-11-20",
-    "chg": 0.59,
-    "chg_pct": 0.641,
-    "chg_20": -20.691,
+    "chg": -2.03,
+    "chg_pct": -2.207,
+    "chg_20": -22.935,
     "history": [
      [
       "06/03",
@@ -6232,7 +6167,7 @@
      ],
      [
       "11/20",
-      92.57
+      89.95
      ]
     ]
    }
