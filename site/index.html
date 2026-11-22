@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>사팔사팔</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="theme-color" content="#161B22">
 <meta name="description" content="밤사이 해외 시장 흐름으로 계산한 코스피200·주요 종목의 예상 시작가와 오늘의 상방·하방 범위">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -33,6 +35,9 @@ button { font: inherit; color: inherit; }
 header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
 h1 { font-size: 26px; font-weight: 800; margin: 0; letter-spacing: -0.5px; }
 h1 span { color: var(--up); }
+h1.logo { display: flex; align-items: center; gap: 10px; }
+h1.logo .logo-mark { height: 34px; width: auto; flex: none; }
+h1.logo .logo-text { color: var(--text); }
 .sub { color: var(--muted); font-size: 14px; margin: 2px 0 0; }
 .theme-btn { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px;
   cursor: pointer; font-size: 13px; white-space: nowrap; }
@@ -267,7 +272,19 @@ footer { margin-top: 24px; font-size: 12px; color: var(--muted); border-top: 1px
 <div class="wrap">
   <header>
     <div>
-      <h1>사팔<span>사팔</span></h1>
+      <h1 class="logo">
+        <svg class="logo-mark" viewBox="0 0 70 62" role="img" aria-label="사팔사팔 로고">
+          <line x1="5" y1="53" x2="17" y2="11" style="stroke:var(--up)" stroke-width="5.5" stroke-linecap="round"/>
+          <line x1="17" y1="11" x2="26" y2="35" style="stroke:var(--down)" stroke-width="5.5" stroke-linecap="round"/>
+          <polyline points="20,35 26,39 29,31" fill="none" style="stroke:var(--down)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="38" y1="13" x2="64" y2="13" style="stroke:var(--up)" stroke-width="5.5" stroke-linecap="round"/>
+          <line x1="38" y1="51" x2="64" y2="51" style="stroke:var(--down)" stroke-width="5.5" stroke-linecap="round"/>
+          <line x1="44.5" y1="13" x2="44.5" y2="51" style="stroke:var(--muted)" stroke-width="4" stroke-linecap="round"/>
+          <line x1="57.5" y1="13" x2="57.5" y2="51" style="stroke:var(--muted)" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="51" cy="32" r="4.5" style="fill:var(--bg);stroke:var(--text)" stroke-width="2.5"/>
+        </svg>
+        <span class="logo-text">사팔<span>사팔</span></span>
+      </h1>
     </div>
     <button class="theme-btn" id="themeBtn" aria-label="화면 테마 바꾸기"></button>
   </header>
