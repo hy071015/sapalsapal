@@ -1,0 +1,987 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KOSPI4848</title>
+<meta name="description" content="밤사이 해외 시장 흐름으로 계산한 코스피200·주요 종목의 예상 시작가와 오늘의 상방·하방 범위">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #f4f5f8; --card: #ffffff; --text: #14171c; --muted: #6b7280; --line: #e5e7eb;
+  --up: #e5383b; --down: #2f6fe4; --accent: #111827; --soft: #f1f3f6; --warn: #b45309; --ok: #16a34a;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1116; --card: #161b22; --text: #e6e9ee; --muted: #9aa3ae; --line: #262d36;
+    --up: #ff5a5f; --down: #5b9bff; --accent: #e6e9ee; --soft: #1d232c; --warn: #f2b45a; --ok: #4ade80;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1116; --card: #161b22; --text: #e6e9ee; --muted: #9aa3ae; --line: #262d36;
+  --up: #ff5a5f; --down: #5b9bff; --accent: #e6e9ee; --soft: #1d232c; --warn: #f2b45a; --ok: #4ade80;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font-family: "Noto Sans KR", system-ui, sans-serif; line-height: 1.5; }
+button { font: inherit; color: inherit; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 22px 16px 48px; }
+
+/* 헤더 */
+header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+h1 { font-size: 26px; font-weight: 800; margin: 0; letter-spacing: -0.5px; }
+h1 span { color: var(--up); }
+.sub { color: var(--muted); font-size: 14px; margin: 2px 0 0; }
+.theme-btn { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px;
+  cursor: pointer; font-size: 13px; white-space: nowrap; }
+
+/* 오늘 진행 상황 */
+.steps { display: flex; align-items: center; gap: 6px; background: var(--card); border: 1px solid var(--line);
+  border-radius: 14px; padding: 10px 14px; margin-bottom: 14px; flex-wrap: wrap; }
+.step { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.step .dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center;
+  font-size: 11px; font-weight: 800; }
+.step.done { color: var(--text); }
+.step.done .dot { background: var(--ok); border-color: var(--ok); color: #fff; }
+.step b { font-weight: 700; }
+.step-line { flex: 0 0 18px; height: 2px; background: var(--line); }
+.steps .upd { margin-left: auto; font-size: 12px; color: var(--muted); }
+
+/* 종목 카드 */
+.cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px;
+  cursor: pointer; text-align: left; transition: border-color .15s, transform .15s; min-width: 0; }
+.card:hover { transform: translateY(-2px); }
+.card.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.card .nm { font-weight: 700; font-size: 15px; }
+.card .pc { font-size: 11px; color: var(--muted); }
+.card .hl { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; margin-top: 8px;
+  font-variant-numeric: tabular-nums; }
+.card .hl small { display: block; font-size: 10px; font-weight: 400; color: var(--muted); }
+.card .hl .r { text-align: right; }
+
+/* 범위 막대 */
+.mini { position: relative; height: 6px; background: var(--soft); border-radius: 99px; margin-top: 8px; }
+.mini .seg { position: absolute; top: 0; bottom: 0; border-radius: 99px;
+  background: linear-gradient(90deg, var(--down), var(--up)); opacity: .85; }
+.mini .pcm { position: absolute; top: -3px; width: 2px; height: 12px; background: var(--muted); }
+.mini .opd { position: absolute; top: 50%; width: 10px; height: 10px; border-radius: 50%; background: var(--card);
+  border: 2px solid var(--text); transform: translate(-50%, -50%); }
+.up { color: var(--up); } .down { color: var(--down); }
+
+/* 상세 */
+.detail { margin-top: 14px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
+.dhead { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; align-items: center; }
+.dhead h2 { margin: 0; font-size: 20px; }
+.badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: var(--soft); }
+.badge.ready { color: var(--ok); } .badge.wait { color: var(--warn); }
+
+.gauge { margin: 22px 4px 6px; }
+.gauge .track { position: relative; height: 12px; background: var(--soft); border-radius: 99px; }
+.gauge .seg { position: absolute; top: 0; bottom: 0; border-radius: 99px; background: linear-gradient(90deg, var(--down), var(--up)); }
+.gauge .mk { position: absolute; top: -6px; width: 2px; height: 24px; background: var(--text); }
+.gauge .mk.pc { background: var(--muted); }
+.gauge .op { position: absolute; top: 50%; width: 14px; height: 14px; border-radius: 50%; background: var(--card);
+  border: 3px solid var(--text); transform: translate(-50%, -50%); }
+.gauge .labels { position: relative; height: 46px; font-size: 12px; }
+.gauge .labels div { position: absolute; top: 8px; transform: translateX(-50%); text-align: center; white-space: nowrap; }
+.gauge .labels b { display: block; font-size: 15px; font-variant-numeric: tabular-nums; }
+.gauge .labels span { color: var(--muted); }
+.gauge .labels.sub { height: 40px; }
+.gauge .labels.sub div { top: 2px; }
+.gauge .labels.sub b { font-size: 13px; font-weight: 600; }
+
+.big { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 14px 0; }
+.big > div { background: var(--soft); border-radius: 12px; padding: 12px; }
+.big .lb { font-size: 12px; color: var(--muted); }
+.big .v { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.big .p { font-size: 13px; font-weight: 500; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 6px; }
+.chip { background: var(--soft); border-radius: 999px; padding: 4px 10px; font-size: 12px; }
+.section-t { font-weight: 700; font-size: 15px; margin: 22px 0 8px; }
+.small { font-weight: 400; color: var(--muted); font-size: 12px; }
+.chart-box { position: relative; height: 300px; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.stat { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+.stat .lb { font-size: 12px; color: var(--muted); }
+.stat .v { font-size: 18px; font-weight: 800; }
+.stat .s { font-size: 11px; color: var(--muted); }
+.note { font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+.mid { background: var(--soft); border-radius: 12px; padding: 14px; display: grid; gap: 8px; }
+.midrow { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; align-items: baseline; }
+.midrow b { font-size: 16px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bar { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; margin-top: -4px; }
+.bar i { display: block; height: 100%; border-radius: 99px; }
+.mid .s { font-size: 11px; color: var(--muted); }
+
+.live { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+.live th, .live td { padding: 7px 6px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+.live th { color: var(--muted); font-weight: 500; font-size: 12px; }
+.live th:first-child, .live td:first-child { text-align: left; }
+.live .err-s { font-size: 11px; color: var(--muted); }
+.table-scroll { overflow-x: auto; }
+
+.tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+.tabs button { flex: 1; max-width: 180px; padding: 9px 14px; border-radius: 12px; border: 1px solid var(--line);
+  background: var(--card); cursor: pointer; font-weight: 700; font-size: 14px; color: var(--muted); }
+.tabs button.on { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.exp-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 14px; }
+.exp { background: var(--soft); border-radius: 14px; padding: 14px; }
+.exp-h { display: flex; flex-direction: column; }
+.exp-h b { font-size: 15px; }
+.exp .track { position: relative; height: 10px; background: var(--line); border-radius: 99px; margin: 16px 0 10px; }
+.exp .track .seg { position: absolute; top: 0; bottom: 0; border-radius: 99px; background: linear-gradient(90deg, var(--down), var(--up)); }
+.exp .track .mk { position: absolute; top: -5px; width: 2px; height: 20px; background: var(--text); }
+.exp-v { display: flex; justify-content: space-between; font-weight: 800; font-size: 17px; font-variant-numeric: tabular-nums; }
+.exp-v small { display: block; font-size: 11px; font-weight: 400; color: var(--muted); }
+.exp-v span { display: block; font-size: 12px; font-weight: 500; }
+.exp-v .r { text-align: right; }
+.exp .s { font-size: 11px; color: var(--muted); margin-top: 8px; }
+.surprise { font-size: 13px; }
+/* 이벤트 달력 */
+:root { --ev-w: #8b95a7; --ev-m: #f08c2e; --ev-q: #e5383b; --ev-h: #9aa3ae; --ev-fomc: #8b5cf6; --ev-cpi: #0ea5a4; --ev-bok: #16a34a; }
+.cal-card { background: var(--soft); border-radius: 14px; padding: 14px; cursor: pointer; transition: transform .15s; max-width: 440px; }
+.cal-card .cal .day { min-height: 28px; }
+.cal-card:hover { transform: translateY(-2px); }
+.cal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.cal-head b { font-size: 15px; }
+.cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+.cal .day { min-width: 0; }
+.cal .dow { font-size: 11px; color: var(--muted); text-align: center; padding: 2px 0; }
+.cal .dow.sun, .cal .day.sun .n { color: var(--up); } .cal .dow.sat, .cal .day.sat .n { color: var(--down); }
+.cal .day { min-height: 34px; border-radius: 8px; padding: 3px 4px; background: var(--card); font-size: 12px; }
+.cal .day.out { background: transparent; }
+.cal .day.today { box-shadow: 0 0 0 2px var(--accent) inset; }
+.cal .day .n { font-weight: 700; font-size: 11px; }
+.cal .dots { display: flex; gap: 2px; flex-wrap: wrap; margin-top: 2px; }
+.cal .dots i { width: 6px; height: 6px; border-radius: 50%; display: block; }
+.cal.cal-big .day { min-height: 84px; padding: 5px 6px; }
+.cal.cal-big .day .n { font-size: 13px; }
+.cal .ev { display: block; font-size: 10.5px; line-height: 1.3; padding: 1px 4px; border-radius: 4px; margin-top: 2px; color: #fff;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cal-legend { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 11px; color: var(--muted); margin-top: 8px; }
+.cal-legend span::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; background: var(--c); }
+.cal-nav { display: flex; align-items: center; gap: 10px; }
+.cal-nav button { background: var(--soft); border: 0; border-radius: 8px; width: 32px; height: 32px; cursor: pointer; font-size: 16px; }
+.ev-list { margin-top: 12px; font-size: 13px; }
+.ev-list div { display: grid; grid-template-columns: 76px 1fr; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.ev-list .t { font-weight: 700; }
+.modal.cal-modal { max-width: 900px; }
+@media (max-width: 640px) { .cal.cal-big .day { min-height: 60px; padding: 3px; } .cal.cal-big .ev { font-size: 9px; padding: 0 2px; } }/* 하단 메뉴 */
+.foot-links { display: flex; flex-wrap: wrap; gap: 4px 18px; margin-bottom: 12px; }
+.foot-links button { background: none; border: 0; padding: 4px 0; cursor: pointer; font-size: 14px; color: var(--text); }
+.foot-links button:hover { text-decoration: underline; }
+.foot-brand { margin-bottom: 8px; font-size: 14px; color: var(--text); }
+footer p { margin: 0; line-height: 1.6; }
+.modal.info { max-width: 720px; }
+.info-body { font-size: 14px; line-height: 1.75; margin-top: 8px; }
+.info-body h4 { font-size: 15px; margin: 18px 0 6px; }
+.info-body ul, .info-body ol { padding-left: 20px; margin: 6px 0; }
+.info-body .q { font-weight: 700; margin-top: 14px; }
+.info-body .q::before { content: "Q. "; color: var(--up); }
+.info-body .a { color: var(--muted); }
+.info-body .a::before { content: "A. "; font-weight: 700; color: var(--text); }
+/* 선물·옵션 탭 */
+.edu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 12px; }
+.edu { background: var(--soft); border-radius: 14px; padding: 16px; font-size: 14px; line-height: 1.7; }
+.edu h3 { margin: 0 0 6px; font-size: 16px; }
+.edu .tag { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 99px; background: var(--card); margin-bottom: 6px; }
+.edu .ex { background: var(--card); border-radius: 10px; padding: 10px 12px; margin-top: 8px; font-size: 13px; }
+.edu .link { margin-top: 8px; font-size: 13px; color: var(--ok); font-weight: 700; }
+.edu.wide { grid-column: 1 / -1; }
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0; font-size: 13px; }
+.flow span { background: var(--card); border-radius: 8px; padding: 6px 10px; }
+.flow i { font-style: normal; color: var(--muted); }
+@media (max-width: 640px) { .edu-grid { grid-template-columns: 1fr; } .tabs button { font-size: 13px; padding: 9px 6px; } }
+.fg-top { display: grid; grid-template-columns: 220px 1fr; gap: 18px; align-items: center; margin-top: 12px; }
+.fg-score { text-align: center; }
+.fg-score .num { font-size: 52px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.fg-score .lab { font-size: 16px; font-weight: 700; margin-top: 4px; }
+.fg-bar { position: relative; height: 14px; border-radius: 99px; margin: 14px 0 4px;
+  background: linear-gradient(90deg, #2f6fe4, #7aa6f0 30%, #c9ccd3 50%, #f09a8a 70%, #e5383b); }
+.fg-bar .mk { position: absolute; top: -5px; width: 4px; height: 24px; border-radius: 2px; background: var(--text); transform: translateX(-50%); }
+.fg-scale { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+.fg-cmp { display: flex; gap: 14px; font-size: 12px; color: var(--muted); margin-top: 8px; flex-wrap: wrap; }
+.fg-cmp b { color: var(--text); }
+.comp { display: grid; grid-template-columns: 110px 1fr 44px; gap: 10px; align-items: center; font-size: 13px; margin: 8px 0; }
+.comp .bar { margin: 0; height: 8px; }
+.comp small { display: block; font-size: 11px; color: var(--muted); }
+.ref-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+.ref { background: var(--soft); border-radius: 14px; padding: 14px; min-width: 0; }
+.ref .nm { font-size: 13px; color: var(--muted); }
+.ref .val { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.ref .chg { font-size: 12px; }
+.ref .spark { position: relative; height: 60px; margin-top: 8px; }
+.ref.empty .val { font-size: 15px; color: var(--muted); font-weight: 500; }
+@media (max-width: 640px) {
+  .fg-top { grid-template-columns: 1fr; }
+  .ref-list { grid-template-columns: 1fr; }
+  .comp { grid-template-columns: 90px 1fr 40px; }
+}
+.modal-bg { position: fixed; inset: 0; background: rgba(0, 0, 0, .55); display: none; align-items: center;
+  justify-content: center; z-index: 50; padding: 16px; }
+.modal-bg.show { display: flex; }
+.modal { background: var(--card); border: 1px solid var(--line); border-radius: 16px; width: 100%; max-width: 860px;
+  padding: 16px 18px; max-height: 92vh; overflow: auto; }
+.modal-h { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.modal-h h3 { margin: 0; font-size: 17px; }
+.modal-x { background: var(--soft); border: 0; border-radius: 10px; width: 34px; height: 34px; cursor: pointer; font-size: 18px; }
+.modal .chart-box { height: 360px; margin-top: 10px; }
+.modal .sumrow { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; margin-top: 8px; font-variant-numeric: tabular-nums; }
+@media (max-width: 640px) { .modal .chart-box { height: 300px; } .modal { padding: 14px; } }
+#chart { cursor: pointer; }
+.how { margin-top: 14px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; font-size: 14px; }
+.how ol { margin: 6px 0 0; padding-left: 20px; }
+footer { margin-top: 24px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; }
+.err { padding: 40px; text-align: center; color: var(--muted); }
+
+@media (max-width: 900px) {
+  .cards { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; margin: 0 -16px; padding: 2px 16px 6px;
+    scrollbar-width: none; }
+  .cards::-webkit-scrollbar { display: none; }
+  .card { flex: 0 0 160px; scroll-snap-align: start; }
+}
+@media (max-width: 640px) {
+  h1 { font-size: 22px; } .sub { font-size: 13px; }
+  .detail { padding: 16px; }
+  .big { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .big > div { padding: 10px 8px; }
+  .big .v { font-size: 16px; } .big .p { font-size: 11px; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .chart-box { height: 240px; }
+  .steps { gap: 4px 12px; padding: 10px 12px; }
+  .step-line { display: none; }
+  .step { font-size: 12px; gap: 4px; }
+  .steps { gap: 4px 10px; }
+  .steps .upd { margin-left: 0; width: 100%; }
+  .gauge .labels b { font-size: 13px; }
+  .exp-list { grid-template-columns: 1fr; }
+  .tabs button { max-width: none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>KOSPI<span>4848</span></h1>
+    </div>
+    <button class="theme-btn" id="themeBtn" aria-label="화면 테마 바꾸기"></button>
+  </header>
+
+  <div class="tabs" id="tabs">
+    <button data-tab="day" class="on">오늘 예측</button>
+    <button data-tab="expiry">만기 예측</button>
+    <button data-tab="ref">참고지표</button>
+    <button data-tab="edu">선물·옵션</button>
+  </div>
+  <div class="cards" id="cards"></div>
+  <div class="detail" id="detail"></div>
+  <div class="detail" id="past"></div>
+
+  <footer>
+    <nav class="foot-links">
+      <button data-info="about">사이트 소개</button>
+      <button data-info="method">계산 방법</button>
+      <button data-info="caution">유의사항</button>
+      <button data-info="faq">자주 묻는 질문</button>
+    </nav>
+    <div class="foot-brand"><b>KOSPI4848</b> <span class="small">사팔사팔 · 짧게 사고파는 사람들을 위한 참고 지표</span></div>
+    <p>본 사이트의 모든 수치는 통계 모델로 계산한 <b>참고용 정보</b>이며, 투자 권유나 매매 추천이 아닙니다.
+    예측은 틀릴 수 있고, 투자 판단과 그 결과의 책임은 투자자 본인에게 있습니다.
+    시세 데이터는 공개된 데이터를 사용하며 실시간 시세가 아닙니다.</p>
+  </footer>
+</div>
+
+<div class="modal-bg" id="calBg" role="dialog" aria-modal="true">
+  <div class="modal cal-modal">
+    <div class="modal-h">
+      <div class="cal-nav"><button id="calPrev" aria-label="이전 달">‹</button><h3 id="calTitle"></h3><button id="calNext" aria-label="다음 달">›</button></div>
+      <button class="modal-x" id="calX" aria-label="닫기">✕</button>
+    </div>
+    <div id="calBody" style="margin-top:12px"></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="infoBg" role="dialog" aria-modal="true">
+  <div class="modal info">
+    <div class="modal-h"><h3 id="infoTitle"></h3><button class="modal-x" id="infoX" aria-label="닫기">✕</button></div>
+    <div class="info-body" id="infoBody"></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalBg" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-h">
+      <div><h3 id="modalTitle"></h3><div class="small" id="modalSub"></div></div>
+      <button class="modal-x" id="modalX" aria-label="닫기">✕</button>
+    </div>
+    <div class="sumrow" id="modalSum"></div>
+    <div class="chart-box"><canvas id="dayChart"></canvas></div>
+    <div class="note">5분봉 · 빨간 점선 = 9:30 예상 상방, 파란 점선 = 9:30 예상 하방, 회색 선 = 종가, 세로 점선 = 9:30 예상치 공개 시점. 분봉 데이터는 15:00까지만 있어서 마지막 20분은 비어 있어요.</div>
+  </div>
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+let DATA = null, current = 0, chart = null, tab = "day";
+
+const fmt = (v, d) => Number(v).toLocaleString("ko-KR", { minimumFractionDigits: d, maximumFractionDigits: d });
+const sign = (p) => (p > 0 ? "+" : "") + Number(p).toFixed(2) + "%";
+const cls = (p) => (p > 0 ? "up" : p < 0 ? "down" : "");
+const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const kstToday = () => new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Seoul" }).format(new Date());
+const dayName = (s) => {
+  const d = new Date(s + "T00:00:00");
+  return `${d.getMonth() + 1}월 ${d.getDate()}일 (${"일월화수목금토"[d.getDay()]})`;
+};
+
+/* ── 테마 ── */
+const THEMES = [["system", "🖥️ 자동"], ["light", "☀️ 라이트"], ["dark", "🌙 다크"]];
+let theme = "system";
+try { theme = localStorage.getItem("theme") || "system"; } catch (e) {}
+function applyTheme() {
+  if (theme === "system") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme", theme);
+  $("#themeBtn").textContent = THEMES.find((t) => t[0] === theme)[1];
+  if (DATA) renderDetail();
+}
+$("#themeBtn").addEventListener("click", () => {
+  theme = THEMES[(THEMES.findIndex((t) => t[0] === theme) + 1) % THEMES.length][0];
+  try { localStorage.setItem("theme", theme); } catch (e) {}
+  applyTheme();
+});
+applyTheme();
+
+/* ── 오늘 진행 상황 ── */
+function renderSteps() {
+  if (!$("#steps")) return;  // 진행 표시 줄은 화면에서 뺐어요
+  const today = kstToday(), a = DATA.assets;
+  const opened = a.some((x) => x.today && x.today.date === today && x.today.open);
+  const midday = a.some((x) => x.today && x.today.date === today && x.today.midday);
+  const closed = a.some((x) => x.today && x.today.date === today && x.today.actual);
+  const step = (ok, t, n) => `<div class="step ${ok ? "done" : ""}"><span class="dot">${ok ? "✓" : ""}</span><b>${n}</b> ${t}</div>`;
+  const ln = '<span class="step-line"></span>';
+  $("#steps").innerHTML = step(opened, "09:30", "상방·하방") + ln + step(midday, "12:30", "오후 예측") + ln +
+    step(closed, "16:10", "결과 기록") +
+    `<span class="upd">마지막 업데이트 ${DATA.generated_at}</span>`;
+}
+
+/* ── 범위 계산 도우미 ── */
+function scaleOf(values) {
+  const lo = Math.min(...values), hi = Math.max(...values), pad = (hi - lo) * 0.12 || 1;
+  return (v) => ((v - (lo - pad)) / (hi - lo + pad * 2)) * 100;
+}
+
+/* 오늘 9:30 발표가 있으면 그 값을, 없으면 '9:30 공개 대기' 상태 */
+function best(a) {
+  const o = a.today && a.today.date === kstToday() && a.today.open;
+  if (!o) return { phase: "wait" };
+  const base = o.prev_close;  // 전일 종가
+  const r = (v) => (base ? (v / base - 1) * 100 : 0);
+  return { phase: "open", o, base, actual: a.today.actual,
+    pct: { open: r(o.open), high: r(o.high), low: r(o.low) } };
+}
+
+function renderCards() {
+  $("#cards").innerHTML = DATA.assets.map((a, i) => {
+    const b = best(a), d = a.decimals;
+    let body;
+    if (b.phase === "open") {
+      const x = scaleOf([b.o.low, b.o.high, b.o.open]);
+      body = `<div class="pc">시작가 ${fmt(b.o.open, d)} ${b.base ? `<span class="${cls(b.pct.open)}">${sign(b.pct.open)}</span>` : ""}</div>
+      <div class="hl">
+        <div class="down"><small>하방</small>${fmt(b.o.low, d)}</div>
+        <div class="up r"><small>상방</small>${fmt(b.o.high, d)}</div>
+      </div>
+      <div class="mini"><div class="seg" style="left:${x(b.o.low)}%;right:${100 - x(b.o.high)}%"></div>
+        <div class="opd" style="left:${x(b.o.open)}%"></div></div>`;
+    } else {
+      body = `<div class="pc">전일 종가 ${fmt(a.prev_close, d)}</div>
+      <div class="hl"><div><small>${dayName(a.target_date).replace(/ \(.\)/, "")}</small>상방·하방</div></div>
+      <div class="pc" style="margin-top:4px">9:30 공개 예정</div>`;
+    }
+    return `<button class="card ${i === current ? "active" : ""}" data-i="${i}"><div class="nm">${a.name}</div>${body}</button>`;
+  }).join("");
+  document.querySelectorAll(".card").forEach((el) =>
+    el.addEventListener("click", () => { current = +el.dataset.i; renderCards(); renderDetail(); }));
+}
+
+function gaugeHtml(a, p, ref) {
+  const d = a.decimals, x = scaleOf([p.low, p.high, ref]);
+  return `<div class="gauge">
+    <div class="track">
+      <div class="seg" style="left:${x(p.low)}%;right:${100 - x(p.high)}%"></div>
+      <div class="mk pc" style="left:${x(ref)}%"></div>
+      <div class="op" style="left:${x(p.open)}%"></div>
+    </div>
+    ${(() => {
+      // 하방·시작가·상방·전일 종가를 한 줄에 같은 높이로. 가까우면 서로 밀어서 겹치지 않게.
+      const items = [
+        { x: x(p.low), v: p.low, t: "하방", c: "down" },
+        { x: x(p.open), v: p.open, t: "시작가", c: "" },
+        { x: x(p.high), v: p.high, t: "상방", c: "up" },
+        { x: x(ref), v: ref, t: "전일 종가", c: "" },
+      ].sort((m, n) => m.x - n.x);
+      const GAP = 17, LO = 8, HI = 92;
+      for (let k = 0; k < 4; k++) {               // 몇 번 반복하며 간격 맞추기
+        items[0].x = Math.max(LO, items[0].x);
+        for (let i = 1; i < items.length; i++) items[i].x = Math.max(items[i].x, items[i - 1].x + GAP);
+        items[items.length - 1].x = Math.min(HI, items[items.length - 1].x);
+        for (let i = items.length - 2; i >= 0; i--) items[i].x = Math.min(items[i].x, items[i + 1].x - GAP);
+      }
+      return `<div class="labels">${items.map((m) =>
+        `<div style="left:${m.x}%" class="${m.c}"><b>${fmt(m.v, d)}</b><span>${m.t}</span></div>`).join("")}</div>`;
+    })()}
+  </div>`;
+}
+
+function expiryHtml(a) {
+  const d = a.decimals;
+  const all = a.expiry.flatMap((x) => [x.low, x.high]).concat(a.prev_close);
+  const x = scaleOf(all);
+  return `
+    <div class="dhead">
+      <h2>${a.name} · 만기까지 예상 범위</h2>
+      <span class="badge">80% 확률 범위</span>
+    </div>
+    <div class="small" style="margin-top:6px">기준가 ${fmt(a.prev_close, d)} (${a.prev_date} 종가) · 각 만기일 장 마감 가격이 들어올 것으로 보이는 범위예요. 막대의 검은 선이 기준가예요.</div>
+    <div class="exp-list">${a.expiry.map((e) => `
+      <div class="exp">
+        <div class="exp-h"><b>${e.label}</b><span class="small">${dayName(e.date)} · ${e.days}거래일 남음</span></div>
+        <div class="track"><div class="seg" style="left:${x(e.low)}%;right:${100 - x(e.high)}%"></div>
+          <div class="mk" style="left:${x(a.prev_close)}%"></div></div>
+        <div class="exp-v">
+          <div class="down"><small>하단</small>${fmt(e.low, d)}<span>${sign(e.low_pct)}</span></div>
+          <div class="up r"><small>상단</small>${fmt(e.high, d)}<span>${sign(e.high_pct)}</span></div>
+        </div>
+        <div class="s">최근 1년 실제 적중률 ${e.cover}% (목표 80%)</div>
+      </div>`).join("")}
+    </div>
+    <div class="note">※ 지금은 최근 변동성과 과거 움직임의 분포로 계산해요. 코스피200 위클리·월물 옵션 가격(시장이 예상하는 변동폭)을 연결하면 더 정확한 방식으로 바뀔 예정이에요.${a.id !== "kospi200" ? " 개별 종목도 코스피200 옵션 만기일을 기준으로 보여드려요." : ""}</div>
+    ${a.note ? `<div class="note">※ ${a.note}</div>` : ""}`;
+}
+
+/* ── 하단 안내 팝업 ── */
+const INFO = {
+  about: ["사이트 소개", `
+    <p><b>KOSPI4848</b>(사팔사팔)은 짧게 사고파는 분들이 장 초반에 참고할 수 있도록,
+    <b>코스피200과 주요 종목(삼성전자·SK하이닉스·삼성전기·현대차)의 오늘 상방·하방</b>을 매일 계산해 보여주는 사이트예요.</p>
+    <h4>무엇을 보여주나요?</h4>
+    <ul>
+      <li><b>오늘 예측</b>: 9:30에 발표하는 오늘의 상방(예상 고가)·하방(예상 저가), 점심 이후 오후 예측</li>
+      <li><b>만기 예측</b>: 이번 주 월·목 위클리 만기와 이번 달 월물 만기까지의 예상 변동 범위</li>
+      <li><b>참고지표</b>: 코스피 공포탐욕지수, 미국채 10년물 금리, 유가</li>
+      <li><b>선물·옵션</b>: 우리 계산에 영향을 주는 선물·옵션 개념 설명</li>
+    </ul>
+    <h4>이 사이트가 지키는 원칙</h4>
+    <ul>
+      <li>틀린 날도 숨기지 않아요. 매일 발표한 예측과 실제 결과를 <b>실전 기록</b>에 그대로 쌓아요.</li>
+      <li>모든 성적표는 과거를 '그날 알 수 있던 정보만으로' 다시 예측해 계산해요.</li>
+      <li>매수·매도 추천을 하지 않아요. 숫자는 참고용 기준선이에요.</li>
+    </ul>`],
+  method: ["계산 방법", `
+    <h4>9:30 상방·하방</h4>
+    <p>실제 <b>시작가</b>를 기준점으로, 밤사이 미국 시장(나스닥·S&amp;P500 선물, 한국 ETF(EWY), 반도체지수, 엔비디아·마이크론 등),
+    공포지수(VIX), 원/달러 환율, 최근 변동폭과 흐름을 함께 넣어 계산해요.
+    과거 약 6년 동안 "이런 날엔 시작가에서 위로·아래로 이만큼 움직였다"는 관계를 통계 모델(분위 회귀)로 학습했고,
+    상방·하방은 평균이 아니라 <b>가장 흔하게 나온 값(중앙값)</b>을 맞히도록 만들었어요. 모델은 20거래일마다 최신 데이터로 다시 학습해요.</p>
+    <h4>오후 예측 (12:30)</h4>
+    <p>오전장(9시~12시)의 시작가·고가·저가·현재가와 평소 변동폭을 보고,
+    오후에 <b>오전 고가를 돌파할 확률</b>과 <b>오전 저가를 이탈할 확률</b>, 오늘의 예상 최대 범위를 계산해요.</p>
+    <h4>만기 예측</h4>
+    <p>최근 변동성(최근 움직임에 더 큰 비중을 두는 방식)과 과거에 실제로 나타난 움직임의 분포를 이용해,
+    각 만기일 장 마감 가격이 80% 확률로 들어올 범위를 계산해요. 앞으로 코스피200 옵션 가격(내재변동성)을 연결해 더 정확하게 바꿀 예정이에요.</p>
+    <h4>코스피 공포탐욕지수</h4>
+    <p>주가 추세(125일 평균 대비), 변동성, 1년 중 주가 위치, 원화 흐름, 미국 VIX 다섯 가지를 각각 지난 1년 기준 0~100점으로 바꿔 평균 낸 값이에요.
+    KOSPI4848이 직접 계산한 지수라 다른 곳의 지수와 숫자가 다를 수 있어요.</p>
+    <h4>성적표는 어떻게 계산하나요?</h4>
+    <p>과거 각 날짜에 대해 <b>그날 이전 데이터만으로</b> 모델을 학습시켜 예측한 뒤 실제 결과와 비교해요. 미래 정보를 쓰지 않아서, 실제로 매일 예측했다면 나왔을 성적에 가까워요.</p>`],
+  caution: ["유의사항", `
+    <ul>
+      <li>모든 수치는 통계 모델로 계산한 <b>참고용 정보</b>이며 투자 권유나 매매 추천이 아니에요. 투자 판단과 결과의 책임은 투자자 본인에게 있어요.</li>
+      <li>예측은 틀릴 수 있어요. 특히 시장 전체가 하루 종일 한쪽으로 밀리는 날(추세일)에는 크게 빗나갈 수 있어요.</li>
+      <li>시세는 공개된 데이터를 사용하며 <b>약 20분 지연</b>돼요. 실시간 시세가 아니에요.</li>
+      <li>모든 가격은 <b>KRX 정규장(9:00~15:30)</b> 기준이에요. 넥스트레이드(NXT) 프리·애프터마켓 거래는 포함하지 않아요.</li>
+      <li>분봉 차트는 15:00까지의 데이터만 있어서, 마지막 20분과 종가 동시호가는 차트에 보이지 않을 수 있어요.</li>
+      <li>코스피200의 과거 차트와 예측은 KODEX 200 ETF 데이터를 지수 단위로 환산한 값이라 실제 지수와 조금 다를 수 있어요.</li>
+      <li>데이터 제공처 사정이나 휴장일 등으로 업데이트가 늦어지거나 빠질 수 있어요.</li>
+    </ul>`],
+  faq: ["자주 묻는 질문", `
+    <div class="q">왜 장 시작 전에는 예측이 없나요?</div>
+    <div class="a">검증해 보니 장 전 예측은 시작가부터 크게 어긋나는 경우가 많았어요. 실제 시작가를 반영한 9:30 예측이 오차가 약 35~40% 작아서, 9:30에 발표해요.</div>
+    <div class="q">상방·하방을 벗어나는 날도 있나요?</div>
+    <div class="a">네. 상방·하방은 '가장 흔한 고가·저가'를 맞히는 숫자라 벗어나는 날이 꽤 있어요. 성적표와 실전 기록에서 평균적으로 얼마나 차이가 나는지 확인할 수 있어요.</div>
+    <div class="q">갭이 크게 나면 그 방향으로 더 가지 않나요?</div>
+    <div class="a">과거 4년 데이터를 보면 큰 갭 뒤에 같은 방향으로 더 간 날은 절반이 안 됐어요. 갭을 일부 메우는 날이 더 많아서, 범위를 갭 방향으로 일부러 옮기지 않아요.</div>
+    <div class="q">수급(외국인·기관)도 반영하나요?</div>
+    <div class="a">아직은 아니에요. KRX 데이터를 연결해 효과를 검증한 뒤 추가할 예정이에요.</div>
+    <div class="q">다른 종목도 추가되나요?</div>
+    <div class="a">요청이 많은 종목부터 검증해서 추가할 예정이에요.</div>
+    <div class="q">언제 업데이트되나요?</div>
+    <div class="a">9:30 상방·하방, 12:30 오후 예측, 16:10 결과 기록 순으로 업데이트돼요. 데이터 지연 때문에 실제 반영은 몇 분 늦을 수 있어요.</div>`],
+};
+function openInfo(key) {
+  const [t, body] = INFO[key];
+  $("#infoTitle").textContent = t; $("#infoBody").innerHTML = body;
+  $("#infoBg").classList.add("show"); $("#infoBg .modal").scrollTop = 0;
+}
+document.querySelectorAll(".foot-links button").forEach((b) => b.addEventListener("click", () => openInfo(b.dataset.info)));
+$("#infoX").addEventListener("click", () => $("#infoBg").classList.remove("show"));
+$("#infoBg").addEventListener("click", (e) => { if (e.target.id === "infoBg") $("#infoBg").classList.remove("show"); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("#infoBg").classList.remove("show"); });
+
+/* ── 선물·옵션 탭 ── */
+const EDU = `
+  <div class="dhead"><h2>선물·옵션이란?</h2><span class="badge">처음 보는 분들을 위한 쉬운 설명</span></div>
+  <p class="small" style="margin-top:6px">코스피200 선물·옵션은 현물(주식) 가격에 큰 영향을 줘요. KOSPI4848의 예측에도 영향을 주는 핵심 개념만 쉽게 정리했어요.</p>
+  <div class="edu-grid">
+    <div class="edu">
+      <span class="tag">기본</span><h3>현물과 선물</h3>
+      <p><b>현물</b>은 지금 바로 사고파는 주식이나 지수예요. <b>선물</b>은 "미래의 정해진 날(만기일)에 정해진 가격으로 사고팔기로 지금 약속"하는 거래예요.</p>
+      <p>코스피200 선물은 증거금만으로 큰 금액을 거래할 수 있어서(레버리지) 움직임이 빠르고, 외국인·기관이 시장 전체 방향에 베팅할 때 많이 써요.</p>
+      <div class="ex">예: 코스피200이 지금 760인데 선물이 765라면, 시장 참여자들이 만기까지 조금 더 높은 가격을 기대하고 있다는 뜻이에요.</div>
+    </div>
+    <div class="edu">
+      <span class="tag">핵심</span><h3>선물이 현물을 움직이는 방법</h3>
+      <p>선물 가격과 현물 가격의 차이를 <b>베이시스</b>라고 해요. 이 차이가 크게 벌어지면 차익거래 프로그램이 자동으로 현물을 사거나 팔아요.</p>
+      <div class="flow"><span>외국인 선물 대량 매도</span><i>→</i><span>선물 가격 하락 (베이시스 축소)</span><i>→</i><span>프로그램 현물 매도</span><i>→</i><span>삼성전자 등 대형주 하락</span></div>
+      <p>그래서 장중에 외국인이 선물을 계속 팔면, 지수와 대형주가 하루 종일 밀리는 <b>추세일</b>이 나오기 쉬워요.</p>
+      <div class="link">→ 앞으로 외국인 선물 수급을 9:30·오후 예측에 추가할 예정이에요</div>
+    </div>
+    <div class="edu">
+      <span class="tag">기본</span><h3>콜옵션</h3>
+      <p>정해진 가격(<b>행사가</b>)에 <b>살 수 있는 권리</b>예요. 가격이 오를 것 같을 때 사요.</p>
+      <div class="ex">예: 행사가 770 콜옵션을 샀는데 만기에 지수가 790이 되면, 770에 사서 790짜리를 받는 셈이라 이익이에요. 760에서 끝나면 권리를 안 쓰면 되고, 낸 프리미엄(옵션 가격)만 손해예요.</div>
+    </div>
+    <div class="edu">
+      <span class="tag">기본</span><h3>풋옵션</h3>
+      <p>정해진 가격에 <b>팔 수 있는 권리</b>예요. 가격이 내릴 것 같을 때, 또는 갖고 있는 주식의 하락에 대비하는 <b>보험</b>으로 사요.</p>
+      <div class="ex">예: 행사가 750 풋옵션을 샀는데 지수가 720까지 빠지면, 720짜리를 750에 팔 수 있어서 이익이에요.</div>
+      <p style="margin-top:8px">풋옵션이 콜옵션보다 많이 거래되면(<b>풋/콜 비율</b> 상승) 시장에 하락 걱정이 크다는 신호로 봐요.</p>
+    </div>
+    <div class="edu">
+      <span class="tag">핵심</span><h3>내재변동성과 VKOSPI</h3>
+      <p>옵션 가격에는 "시장이 앞으로 얼마나 크게 움직일 거라고 보는지"가 들어 있어요. 이걸 <b>내재변동성</b>이라고 해요.</p>
+      <p>코스피200 옵션으로 계산한 내재변동성이 <b>VKOSPI</b>(코스피 공포지수)예요. 높을수록 시장이 큰 변동을 예상하고 있다는 뜻이에요.</p>
+      <div class="link">→ 만기 예측 범위를 옵션 내재변동성 기반으로 바꿀 예정이에요</div>
+    </div>
+    <div class="edu">
+      <span class="tag">핵심</span><h3>위클리옵션 (월·목 만기)</h3>
+      <p>코스피200 옵션은 매월 둘째 목요일에 끝나는 <b>월물</b> 외에, 매주 <b>월요일·목요일</b>에 끝나는 <b>위클리옵션</b>이 있어요.</p>
+      <p>만기가 며칠밖에 안 남아서, 위클리옵션 가격에는 "이번 주 며칠 동안 얼마나 움직일지"에 대한 시장의 예상이 가장 잘 담겨 있어요.</p>
+      <div class="link">→ 만기 예측 탭의 월·목 만기 범위가 바로 이 위클리옵션 만기 기준이에요</div>
+    </div>
+    <div class="edu">
+      <span class="tag">심화</span><h3>미결제약정</h3>
+      <p>아직 청산되지 않고 남아 있는 선물·옵션 계약 수예요. 돈이 얼마나 새로 들어오고 나가는지 보여줘요.</p>
+      <ul style="margin:6px 0;padding-left:18px">
+        <li>가격 ↑ + 미결제약정 ↑: 새로운 매수세가 들어오는 중 (상승 힘이 강함)</li>
+        <li>가격 ↓ + 미결제약정 ↑: 새로운 매도세가 들어오는 중 (하락 힘이 강함)</li>
+        <li>미결제약정 ↓: 기존 포지션 정리 중 (힘이 약해짐)</li>
+      </ul>
+      <p>옵션은 미결제약정이 많이 몰린 행사가가 만기 직전에 <b>지지선·저항선</b>처럼 작용하기도 해요.</p>
+    </div>
+    <div class="edu">
+      <span class="tag">심화</span><h3>만기일 효과</h3>
+      <p>선물·옵션 만기일에는 남은 포지션을 정리하는 매매와 차익거래 청산 물량이 한꺼번에 나와서, 특히 장 마감 무렵 변동이 커질 수 있어요.</p>
+      <p>선물·옵션이 동시에 만기되는 3·6·9·12월 둘째 목요일은 <b>쿼드러플 위칭데이</b>라고 부르며 특히 주목받아요.</p>
+    </div>
+    <div class="edu wide">
+      <span class="tag">정리</span><h3>KOSPI4848 계산과의 연결</h3>
+      <ul style="margin:6px 0;padding-left:18px">
+        <li><b>9:30 상방·하방</b>: 지금은 시작가와 밤사이 미국 선물(나스닥·S&amp;P500) 등을 반영해요. 앞으로 <b>외국인 선물 순매수·미결제약정</b>을 추가해서 추세일을 더 잘 잡으려고 해요.</li>
+        <li><b>만기 예측</b>: 지금은 최근 변동성 기반이에요. 앞으로 <b>위클리·월물 옵션의 내재변동성</b>으로 바꾸면 시장이 실제로 예상하는 폭을 반영할 수 있어요.</li>
+        <li><b>참고지표</b>: <b>VKOSPI</b>를 KRX 데이터 연결 후 추가할 예정이에요.</li>
+      </ul>
+      <p class="small">선물·옵션은 원금 이상의 손실이 날 수 있는 고위험 상품이에요. 이 설명은 개념 이해를 위한 것이며 거래를 권하는 것이 아니에요.</p>
+    </div>
+  </div>`;
+
+/* ── 이벤트 달력 ── */
+const EV = {
+  quad: ["var(--ev-q)", "동시만기"], expiry_m: ["var(--ev-m)", "월물 만기"], expiry_w: ["var(--ev-w)", "위클리 만기"],
+  fomc: ["var(--ev-fomc)", "FOMC"], cpi: ["var(--ev-cpi)", "미국 CPI"], bok: ["var(--ev-bok)", "금통위"], holiday: ["var(--ev-h)", "휴장"],
+};
+const EV_ORDER = ["holiday", "quad", "expiry_m", "fomc", "bok", "cpi", "expiry_w"];
+let calYM = null;  // [year, month0]
+function eventsOf(y, m) {
+  const p = `${y}-${String(m + 1).padStart(2, "0")}`;
+  return (DATA.ref.events || []).filter((e) => e.date.startsWith(p))
+    .sort((a, b) => a.date.localeCompare(b.date) || EV_ORDER.indexOf(a.type) - EV_ORDER.indexOf(b.type));
+}
+function calGrid(y, m, big) {
+  const evs = eventsOf(y, m), today = kstToday();
+  const first = new Date(y, m, 1).getDay(), days = new Date(y, m + 1, 0).getDate();
+  let html = "일월화수목금토".split("").map((w, i) => `<div class="dow ${i === 0 ? "sun" : i === 6 ? "sat" : ""}">${w}</div>`).join("");
+  for (let i = 0; i < first; i++) html += `<div class="day out"></div>`;
+  for (let dd = 1; dd <= days; dd++) {
+    const ds = `${y}-${String(m + 1).padStart(2, "0")}-${String(dd).padStart(2, "0")}`;
+    const wd = (first + dd - 1) % 7, list = evs.filter((e) => e.date === ds);
+    const inner = big
+      ? list.map((e) => `<span class="ev" style="background:${EV[e.type][0]}" title="${e.note}">${e.title}</span>`).join("")
+      : `<div class="dots">${list.map((e) => `<i style="background:${EV[e.type][0]}"></i>`).join("")}</div>`;
+    html += `<div class="day ${wd === 0 ? "sun" : wd === 6 ? "sat" : ""} ${ds === today ? "today" : ""}"><div class="n">${dd}</div>${inner}</div>`;
+  }
+  return `<div class="cal ${big ? "cal-big" : ""}">${html}</div>`;
+}
+function calLegend() {
+  return `<div class="cal-legend">${EV_ORDER.map((k) => `<span style="--c:${EV[k][0]}">${EV[k][1]}</span>`).join("")}</div>`;
+}
+function calMini() {
+  const t = new Date(kstToday() + "T00:00:00"), y = t.getFullYear(), m = t.getMonth();
+  const next = eventsOf(y, m).concat(eventsOf(m === 11 ? y + 1 : y, (m + 1) % 12))
+    .filter((e) => e.date >= kstToday() && e.type !== "expiry_w").slice(0, 3);
+  return `<div class="cal-card" id="calMini" role="button" aria-label="이벤트 달력 크게 보기">
+    <div class="cal-head"><b>${y}년 ${m + 1}월 이벤트</b><span class="small">눌러서 크게 보기 ⤢</span></div>
+    ${calGrid(y, m, false)}
+    ${calLegend()}
+    ${next.length ? `<div class="small" style="margin-top:8px">다가오는 일정 · ${next.map((e) => `${+e.date.slice(5, 7)}/${+e.date.slice(8)} ${e.title}`).join(" · ")}</div>` : ""}
+  </div>`;
+}
+function openCal() {
+  if (!calYM) { const t = new Date(kstToday() + "T00:00:00"); calYM = [t.getFullYear(), t.getMonth()]; }
+  const [y, m] = calYM, evs = eventsOf(y, m).filter((e) => e.type !== "expiry_w");
+  $("#calTitle").textContent = `${y}년 ${m + 1}월`;
+  $("#calBody").innerHTML = calGrid(y, m, true) + calLegend() +
+    `<div class="ev-list">${evs.length ? evs.map((e) => `<div><span class="t" style="color:${EV[e.type][0]}">${+e.date.slice(5, 7)}/${+e.date.slice(8)} (${"일월화수목금토"[new Date(e.date + "T00:00:00").getDay()]})</span><span><b>${e.title}</b> <span class="small">· ${e.note}</span></span></div>`).join("") : `<div><span></span><span class="small">주요 일정이 없어요.</span></div>`}</div>
+    <div class="note">위클리 만기는 매주 월·목이라 목록에서는 뺐어요. 일정은 공식 발표 기준이며 변경될 수 있어요. 미국 일정은 한국시간 날짜로 표시해요.</div>`;
+  $("#calBg").classList.add("show");
+}
+function moveCal(k) {
+  let [y, m] = calYM; m += k;
+  if (m < 0) { m = 11; y--; } if (m > 11) { m = 0; y++; }
+  calYM = [y, m]; openCal();
+}
+$("#calPrev").addEventListener("click", () => moveCal(-1));
+$("#calNext").addEventListener("click", () => moveCal(1));
+$("#calX").addEventListener("click", () => $("#calBg").classList.remove("show"));
+$("#calBg").addEventListener("click", (e) => { if (e.target.id === "calBg") $("#calBg").classList.remove("show"); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("#calBg").classList.remove("show"); });
+
+/* ── 참고지표 ── */
+let refCharts = [];
+function fgColor(x) { return x < 45 ? css("--down") : x > 55 ? css("--up") : css("--muted"); }
+function renderRef() {
+  refCharts.forEach((c) => c.destroy()); refCharts = [];
+  const R = DATA.ref, fg = R.fear_greed;
+  const cmp = (lab, v) => `<span>${lab} <b>${v}</b></span>`;
+  $("#detail").innerHTML = `
+    <div class="dhead"><h2>코스피 공포탐욕지수</h2><span class="badge">${fg.date} 기준</span></div>
+    <div class="fg-top">
+      <div class="fg-score"><div class="num" style="color:${fgColor(fg.score)}">${Math.round(fg.score)}</div>
+        <div class="lab" style="color:${fgColor(fg.score)}">${fg.label}</div></div>
+      <div>
+        <div class="fg-bar"><div class="mk" style="left:${fg.score}%"></div></div>
+        <div class="fg-scale"><span>극단적 공포</span><span>공포</span><span>중립</span><span>탐욕</span><span>극단적 탐욕</span></div>
+        <div class="fg-cmp">${cmp("전일", Math.round(fg.prev))}${cmp("1주 전", Math.round(fg.week))}${cmp("1달 전", Math.round(fg.month))}</div>
+      </div>
+    </div>
+    <div class="section-t">최근 6개월 공포탐욕지수와 코스피</div>
+    <div class="chart-box" style="height:240px"><canvas id="fgChart"></canvas></div>
+    <div class="note">KOSPI4848이 공개 데이터로 직접 계산한 지수예요. 다른 곳의 공포탐욕지수와는 계산 방식이 달라요.</div>
+
+    <div class="section-t">이벤트 달력</div>
+    ${R.events ? calMini() : ""}
+
+    <div class="section-t">참고지표</div>
+    <div class="ref-list">
+      ${R.items.map((x, i) => `<div class="ref"><div class="nm">${x.name}</div>
+        <div class="val">${x.value.toLocaleString("ko-KR")}<span style="font-size:13px;font-weight:500"> ${x.unit}</span></div>
+        <div class="chg"><span class="${cls(x.chg)}">${x.chg > 0 ? "+" : ""}${x.chg} (${sign(x.chg_pct)})</span> <span class="small">· 20일 ${sign(x.chg_20)}</span></div>
+        <div class="spark"><canvas id="spark${i}"></canvas></div><div class="small">${x.date} 기준 · 최근 6개월</div></div>`).join("")}
+      <div class="ref empty"><div class="nm">코스피 VIX (VKOSPI)</div><div class="val">KRX 데이터 연결 후 표시 예정</div>
+        <div class="small" style="margin-top:6px">코스피200 옵션 가격으로 계산하는 코스피 공포지수예요.</div></div>
+    </div>`;
+
+  const muted = css("--muted"), line = css("--line"), text = css("--text");
+  refCharts.push(new Chart($("#fgChart"), {
+    data: { labels: fg.history.map((x) => x[0]), datasets: [
+      { type: "line", label: "공포탐욕지수", data: fg.history.map((x) => x[1]), borderColor: text, borderWidth: 2, pointRadius: 0, tension: 0.2, yAxisID: "y" },
+      { type: "line", label: "코스피", data: fg.kospi.map((x) => x[1]), borderColor: muted, borderDash: [4, 3], borderWidth: 1.3, pointRadius: 0, tension: 0.2, yAxisID: "y2" },
+    ] },
+    options: { responsive: true, maintainAspectRatio: false, interaction: { mode: "index", intersect: false },
+      plugins: { legend: { labels: { color: muted, boxWidth: 12, font: { size: 11 } } } },
+      scales: {
+        x: { ticks: { color: muted, maxTicksLimit: 7, font: { size: 10 } }, grid: { display: false } },
+        y: { min: 0, max: 100, ticks: { color: muted, stepSize: 25, font: { size: 10 } }, grid: { color: line } },
+        y2: { position: "right", ticks: { color: muted, callback: (v) => fmt(v, 0), font: { size: 10 } }, grid: { display: false } },
+      } },
+  }));
+  const cm = $("#calMini");
+  if (cm) cm.addEventListener("click", () => { calYM = null; openCal(); });
+  R.items.forEach((x, i) => {
+    const up = x.history[x.history.length - 1][1] >= x.history[0][1];
+    refCharts.push(new Chart($(`#spark${i}`), {
+      type: "line",
+      data: { labels: x.history.map((h) => h[0]), datasets: [{ data: x.history.map((h) => h[1]), borderColor: up ? css("--up") : css("--down"), borderWidth: 1.5, pointRadius: 0, tension: 0.2 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: "index", intersect: false, displayColors: false } },
+        scales: { x: { display: false }, y: { display: false } } },
+    }));
+  });
+}
+
+function renderDetail() {
+  const a = DATA.assets[current], s = a.stats, d = a.decimals;
+  $("#cards").style.display = tab === "ref" || tab === "edu" ? "none" : "";
+  $("#past").style.display = tab === "day" ? "" : "none";
+  if (tab !== "day") $("#past").innerHTML = "";
+  if (tab !== "ref") { refCharts.forEach((c) => c.destroy()); refCharts = []; }
+  if (tab === "edu") { if (chart) { chart.destroy(); chart = null; } $("#detail").innerHTML = EDU; return; }
+  if (tab === "ref") { if (chart) { chart.destroy(); chart = null; } renderRef(); return; }
+  if (tab === "expiry") { if (chart) { chart.destroy(); chart = null; } $("#detail").innerHTML = expiryHtml(a); return; }
+  const b = best(a), os = a.open_stats;
+  const sec = (t, sub) => `<div class="section-t">${t} <span class="small">${sub}</span></div>`;
+
+  // ① 오전 예측 (9:30)
+  let morning;
+  if (b.phase === "open") {
+    const o = b.o, Q = b.pct;
+    morning = `${sec("오전 예측", `(${o.at.slice(11)} 발표 · 시작가와 지표 반영)`)}
+    ${gaugeHtml(a, o, o.prev_close)}
+    <div class="big">
+      <div><div class="lb">하방 (예상 저가)</div><div class="v ${cls(Q.low)}">${fmt(o.low, d)}</div><div class="p ${cls(Q.low)}">${sign(Q.low)}</div></div>
+      <div><div class="lb">시작가 ●</div><div class="v ${cls(Q.open)}">${fmt(o.open, d)}</div><div class="p ${cls(Q.open)}">${sign(Q.open)}</div></div>
+      <div><div class="lb">상방 (예상 고가)</div><div class="v ${cls(Q.high)}">${fmt(o.high, d)}</div><div class="p ${cls(Q.high)}">${sign(Q.high)}</div></div>
+    </div>
+    ${o.drivers && o.drivers.length ? `<div class="small" style="margin-top:10px">반영한 지표 · 지난밤 해외 시장</div>
+      <div class="chips">${o.drivers.map((x) => `<span class="chip">${x.name} <b class="${cls(x.ret)}">${sign(x.ret)}</b></span>`).join("")}</div>` : ""}`;
+  } else {
+    morning = `${sec("오전 예측", "(9:30 공개 예정)")}
+    <div class="mid"><div class="midrow"><span>오늘의 상방·하방은 <b style="font-size:14px">9:30</b>에 시작가와 지표를 확인한 뒤 공개돼요.</span></div>
+      <div class="s">전일 종가 ${fmt(a.prev_close, d)} (${a.prev_date})</div></div>`;
+  }
+
+  // ② 오후 예측 (12:30)
+  let afternoon = midHtml(a);
+  if (!afternoon && b.phase === "open") {
+    afternoon = `${sec("오후 예측", "(12:30 공개 예정)")}
+    <div class="mid"><div class="midrow"><span>오전장이 끝나면 오후에 오전 고가를 돌파할지·오전 저가를 이탈할지 확률을 알려드려요.</span></div></div>`;
+  }
+
+  // ③ 오늘 실제 결과
+  let actual = "";
+  if (b.phase === "open" && b.actual) {
+    const o = b.o, x = b.actual;
+    const diff = (act, pred) => { const v = act - pred; return `${v > 0 ? "+" : v < 0 ? "−" : "±"}${fmt(Math.abs(v), d)}`; };
+    actual = `${sec("오늘 실제 결과", "(장 마감 기준)")}
+    <div class="big">
+      <div><div class="lb">실제 저가</div><div class="v down">${fmt(x.low, d)}</div><div class="p small">예상 하방 대비 ${diff(x.low, o.low)}</div></div>
+      <div><div class="lb">종가</div><div class="v ${cls(x.close - o.prev_close)}">${fmt(x.close, d)}</div><div class="p ${cls(x.close - o.prev_close)}">${sign((x.close / o.prev_close - 1) * 100)}</div></div>
+      <div><div class="lb">실제 고가</div><div class="v up">${fmt(x.high, d)}</div><div class="p small">예상 상방 대비 ${diff(x.high, o.high)}</div></div>
+    </div>`;
+  }
+
+  $("#detail").innerHTML = `
+    <div class="dhead"><h2>${a.name} · ${dayName(b.phase === "open" ? a.today.date : a.target_date)}</h2></div>
+    ${morning}
+    ${afternoon}
+    ${actual}`;
+
+  // 별도 위젯: 4848 AI의 과거 예측은?
+  $("#past").innerHTML = `
+    <div class="dhead"><h2>4848 AI의 과거 예측은?</h2><span class="badge">${a.name} · 최근 ${a.history.length}거래일</span></div>
+    <div class="small" style="margin-top:4px">캔들 = 실제 시세, 점선 = 9:30에 예측한 상방·하방 · 캔들을 누르면 그날 5분봉이 열려요</div>
+    <div class="chart-box" style="margin-top:10px"><canvas id="chart"></canvas></div>
+    <div class="stats" style="margin-top:12px;grid-template-columns:repeat(2,1fr)">
+      <div class="stat"><div class="lb">상방 (고가) 평균 오차</div><div class="v">${os.mae_high.toFixed(2)}%</div><div class="s">시작가 ± 보통 폭으로 찍으면 ${os.base_mae_high.toFixed(2)}%</div></div>
+      <div class="stat"><div class="lb">하방 (저가) 평균 오차</div><div class="v">${os.mae_low.toFixed(2)}%</div><div class="s">시작가 ± 보통 폭으로 찍으면 ${os.base_mae_low.toFixed(2)}%</div></div>
+    </div>
+    <div class="note">검증 기간 ${os.start} ~ ${os.end} (${os.days}거래일) · 매일 '그날 알 수 있던 정보만으로' 다시 예측한 결과예요.</div>
+    ${a.note ? `<div class="note">※ ${a.note}</div>` : ""}`;
+  drawChart(a);
+}
+
+function openHtml(a, b) {
+  const d = a.decimals, m = a.today.morning, os = a.open_stats;
+  return `<div class="mid" style="margin-bottom:6px">
+    ${m ? `<div class="surprise">예상 시작가 ${fmt(m.open, d)} → 실제 시작가 <b class="${cls(b.pct.open)}">${fmt(b.pred.open, d)}</b> <span class="small">(차이 ${sign((b.pred.open / m.open - 1) * 100)})</span></div>` : ""}
+    <div class="midrow"><span>오늘 최대 범위 <span class="small">(과거 약 80%의 날이 이 안에서 움직임)</span></span><b>${fmt(b.band[0], d)} ~ ${fmt(b.band[1], d)}</b></div>
+    <div class="s">지난 ${os.days}거래일 검증: 상방 오차 ${os.mae_high.toFixed(2)}%·하방 오차 ${os.mae_low.toFixed(2)}%, 최대 범위 안에서 움직인 날 ${os.band_cover}%</div>
+  </div>`;
+}
+
+function midHtml(a) {
+  const m = a.today && a.today.midday, ms = a.mid_stats, d = a.decimals;
+  if (!m || !ms || a.today.date !== kstToday()) return "";
+  return `
+    <div class="section-t">오후 예측 <span class="small">(${m.at.slice(11)} 발표 · 오전장 흐름 반영)</span></div>
+    <div class="mid">
+      <div class="midrow"><span>오후에 오전 고가 <b style="font-size:14px">${fmt(m.m_high, d)}</b> 돌파할 확률</span><b class="up">${m.prob_up}%</b></div>
+      <div class="bar"><i style="width:${m.prob_up}%;background:var(--up)"></i></div>
+      <div class="midrow"><span>오후에 오전 저가 <b style="font-size:14px">${fmt(m.m_low, d)}</b> 이탈할 확률</span><b class="down">${m.prob_dn}%</b></div>
+      <div class="bar"><i style="width:${m.prob_dn}%;background:var(--down)"></i></div>
+      <div class="midrow"><span>오늘 예상 최대 범위</span><b>${fmt(m.band_low, d)} ~ ${fmt(m.band_high, d)}</b></div>
+      <div class="s">점심 기준가 ${fmt(m.m_last, d)} · 지난 ${ms.days}거래일 검증: 돌파 예측 적중 ${ms.up_acc}%, 이탈 예측 적중 ${ms.dn_acc}%, 최대 범위 안에서 움직인 날 ${ms.band_cover}%</div>
+    </div>`;
+}
+
+function liveHtml(a) {
+  const d = a.decimals;
+  const head = `<div class="section-t">실전 기록 <span class="small">(매일 9:30에 실제로 발표한 상방·하방 vs 실제 결과)</span></div>`;
+  if (!a.live || !a.live.length) return head + `<div class="note">실전 기록은 매일 장 마감 후 하나씩 쌓여요.</div>`;
+  const err = (p, x) => { const e = (p / x - 1) * 100; return `<div class="err-s">오차 ${e > 0 ? "+" : ""}${e.toFixed(2)}%</div>`; };
+  return head + `<div class="table-scroll"><table class="live">
+    <tr><th>날짜</th><th>시작가</th><th>예상 상방</th><th>실제 고가</th><th>예상 하방</th><th>실제 저가</th></tr>
+    ${a.live.map((r) => `<tr>
+      <td>${r.date.slice(5).replace("-", "/")}</td><td>${fmt(r.o_open, d)}</td>
+      <td>${fmt(r.o_high, d)}${err(r.o_high, r.a_high)}</td><td class="up">${fmt(r.a_high, d)}</td>
+      <td>${fmt(r.o_low, d)}${err(r.o_low, r.a_low)}</td><td class="down">${fmt(r.a_low, d)}</td></tr>`).join("")}
+  </table></div>`;
+}
+
+function drawChart(a) {
+  const el = $("#chart");
+  if (!el || !window.Chart) return;
+  if (chart) chart.destroy();
+  const up = css("--up"), down = css("--down"), muted = css("--muted"), line = css("--line"), text = css("--text");
+  const h = a.history, d = a.decimals, u = a.unit === "pt" ? "pt" : "원";
+  const f = (v) => fmt(v, d) + (u === "원" ? "원" : "");
+  const diff = (act, pred) => { const x = act - pred; return (x > 0 ? "+" : x < 0 ? "−" : "±") + fmt(Math.abs(x), d) + (u === "원" ? "원" : "pt"); };
+  const color = h.map((r) => (r.c >= r.o ? up : down));  // 양봉 빨강, 음봉 파랑
+  chart = new Chart(el, {
+    data: {
+      labels: h.map((r) => r.date),
+      datasets: [
+        { type: "bar", label: "꼬리", data: h.map((r) => [r.l, r.h]), backgroundColor: color,
+          barPercentage: 0.12, categoryPercentage: 1, grouped: false, order: 3 },
+        { type: "bar", label: "실제 캔들", data: h.map((r) => [Math.min(r.o, r.c), Math.max(r.o, r.c) + (r.o === r.c ? (r.h - r.l) * 0.01 : 0)]),
+          backgroundColor: color, barPercentage: 0.7, categoryPercentage: 1, grouped: false, order: 2 },
+        { type: "line", label: "예상 상방", data: h.map((r) => r.ph), borderColor: up, backgroundColor: up,
+          borderWidth: 1.5, borderDash: [4, 3], pointRadius: 0, tension: 0.2, order: 1 },
+        { type: "line", label: "예상 하방", data: h.map((r) => r.pl), borderColor: down, backgroundColor: down,
+          borderWidth: 1.5, borderDash: [4, 3], pointRadius: 0, tension: 0.2, order: 1 },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, interaction: { mode: "index", intersect: false },
+      onClick: (evt, els, ch) => {  // 캔들을 누르면 그날 분봉 팝업
+        const pts = ch.getElementsAtEventForMode(evt, "index", { intersect: false }, false);
+        if (pts.length) openDay(a, h[pts[0].index]);
+      },
+      plugins: {
+        legend: { labels: { color: muted, boxWidth: 12, font: { size: 11 }, filter: (it) => it.text !== "꼬리" } },
+        tooltip: {
+          filter: (item) => item.datasetIndex === 0,  // 날짜마다 한 번만 표시
+          displayColors: false,
+          callbacks: {
+            title: (items) => `${h[items[0].dataIndex].date}  ${a.name}`,
+            label: (c) => {
+              const r = h[c.dataIndex];
+              return [
+                `시작가  ${f(r.o)}`,
+                `고가  ${f(r.h)}   (예상 상방 ${f(r.ph)}, 차이 ${diff(r.h, r.ph)})`,
+                `저가  ${f(r.l)}   (예상 하방 ${f(r.pl)}, 차이 ${diff(r.l, r.pl)})`,
+                `종가  ${f(r.c)}`,
+              ];
+            },
+          },
+        },
+      },
+      scales: {
+        x: { ticks: { color: muted, maxTicksLimit: 8, font: { size: 10 } }, grid: { display: false } },
+        y: { beginAtZero: false, grace: "3%",
+          ticks: { color: muted, callback: (v) => fmt(v, 0), font: { size: 10 } }, grid: { color: line } },
+      },
+    },
+  });
+}
+
+/* ── 그날 분봉 팝업 ── */
+const INTRA = {};
+let dayChart = null;
+async function openDay(a, r) {
+  const d = a.decimals, won = a.unit === "원" ? "원" : "";
+  $("#modalTitle").textContent = `${a.name} · ${dayName(r.day)}`;
+  $("#modalSub").textContent = "불러오는 중...";
+  $("#modalSum").innerHTML = "";
+  $("#modalBg").classList.add("show");
+  try {
+    if (!INTRA[a.id]) INTRA[a.id] = await fetch(`intraday/${a.id}.json?t=${DATA.generated_at}`).then((x) => x.json());
+  } catch (e) { $("#modalSub").textContent = "분봉 데이터를 불러오지 못했어요."; return; }
+  const bars = INTRA[a.id][r.day];
+  if (!bars || !bars.length) { $("#modalSub").textContent = "이 날은 분봉 데이터가 없어요."; if (dayChart) dayChart.destroy(); return; }
+  const f = (v) => fmt(v, d) + won;
+  const hit = (act, pred) => `${f(act)} <span class="small">(예상 ${f(pred)}, 차이 ${(act - pred > 0 ? "+" : act - pred < 0 ? "−" : "±") + fmt(Math.abs(act - pred), d) + (won || "pt")})</span>`;
+  $("#modalSub").textContent = `전일 종가 ${f(r.pc)}`;
+  $("#modalSum").innerHTML = `<span>시작가 <b>${f(r.o)}</b></span><span>고가 <b class="up">${hit(r.h, r.ph)}</b></span>
+    <span>저가 <b class="down">${hit(r.l, r.pl)}</b></span><span>종가 <b>${f(r.c)}</b></span>`;
+
+  const up = css("--up"), down = css("--down"), muted = css("--muted"), line = css("--line");
+  const col = bars.map((b) => (b[4] >= b[1] ? up : down));
+  const flat = (v) => bars.map(() => v);
+  if (dayChart) dayChart.destroy();
+  // 9:30 '예상치 공개' 세로선
+  const text = css("--text");
+  const i930 = bars.findIndex((b) => b[0] >= "09:30");
+  const vline = {
+    id: "v930",
+    afterDatasetsDraw(ch) {
+      if (i930 < 0) return;
+      const x = ch.scales.x.getPixelForValue(i930) - (ch.scales.x.getPixelForValue(1) - ch.scales.x.getPixelForValue(0)) / 2;
+      const { top, bottom } = ch.chartArea, c = ch.ctx;
+      c.save();
+      c.strokeStyle = text; c.lineWidth = 1.2; c.setLineDash([3, 3]);
+      c.beginPath(); c.moveTo(x, top); c.lineTo(x, bottom); c.stroke();
+      c.setLineDash([]); c.fillStyle = text; c.font = "bold 11px 'Noto Sans KR', sans-serif";
+      c.textAlign = "left"; c.fillText("9:30 예상치 공개", x + 4, bottom - 6);
+      c.restore();
+    },
+  };
+  dayChart = new Chart($("#dayChart"), {
+    plugins: [vline],
+    data: {
+      labels: bars.map((b) => b[0]),
+      datasets: [
+        { type: "bar", label: "꼬리", data: bars.map((b) => [b[3], b[2]]), backgroundColor: col,
+          barPercentage: 0.15, categoryPercentage: 1, grouped: false, order: 3 },
+        { type: "bar", label: "5분봉", data: bars.map((b) => [Math.min(b[1], b[4]), Math.max(b[1], b[4]) + (b[1] === b[4] ? (r.h - r.l) * 0.003 : 0)]),
+          backgroundColor: col, barPercentage: 0.75, categoryPercentage: 1, grouped: false, order: 2 },
+        { type: "line", label: "예상 상방", data: flat(r.ph), borderColor: up, borderDash: [6, 4], borderWidth: 1.8, pointRadius: 0, order: 1 },
+        { type: "line", label: "예상 하방", data: flat(r.pl), borderColor: down, borderDash: [6, 4], borderWidth: 1.8, pointRadius: 0, order: 1 },
+        { type: "line", label: "종가", data: flat(r.c), borderColor: muted, borderWidth: 1, pointRadius: 0, order: 1 },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { labels: { color: muted, boxWidth: 12, font: { size: 11 }, filter: (it) => it.text !== "꼬리" } },
+        tooltip: {
+          filter: (it) => it.datasetIndex === 0, displayColors: false,
+          callbacks: {
+            title: (it) => bars[it[0].dataIndex][0],
+            label: (c) => { const b = bars[c.dataIndex]; return [`시가 ${f(b[1])}`, `고가 ${f(b[2])}`, `저가 ${f(b[3])}`, `종가 ${f(b[4])}`]; },
+          },
+        },
+      },
+      scales: {
+        x: { ticks: { color: muted, maxTicksLimit: 8, font: { size: 10 } }, grid: { display: false } },
+        y: { beginAtZero: false, grace: "4%", ticks: { color: muted, callback: (v) => fmt(v, a.unit === "pt" ? 1 : 0), font: { size: 10 } }, grid: { color: line } },
+      },
+    },
+  });
+}
+function closeDay() { $("#modalBg").classList.remove("show"); }
+$("#modalX").addEventListener("click", closeDay);
+$("#modalBg").addEventListener("click", (e) => { if (e.target.id === "modalBg") closeDay(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDay(); });
+
+document.querySelectorAll("#tabs button").forEach((b) => b.addEventListener("click", () => {
+  tab = b.dataset.tab;
+  document.querySelectorAll("#tabs button").forEach((x) => x.classList.toggle("on", x === b));
+  if (DATA) renderDetail();
+}));
+
+fetch("data.json?t=" + Date.now())
+  .then((r) => r.json())
+  .then((d) => { DATA = d; renderSteps(); renderCards(); renderDetail(); })
+  .catch(() => { $("#detail").innerHTML = '<div class="err">데이터를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</div>'; });
+
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => DATA && renderDetail());
+</script>
+</body>
+</html>

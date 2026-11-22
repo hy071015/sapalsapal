@@ -1,0 +1,17 @@
+# KRX 원본 데이터 — 약관상 공개 금지. 절대 올리지 않아요.
+data_private/
+
+# 5분봉 누적 원본 (야후 데이터 재배포 방지, 내 컴퓨터에만 보관)
+predictor/archive/
+
+# 개인 설정·스크립트·메모
+.claude/
+PROJECT_NOTES.md
+save_krx*.ps1
+*.env
+.env*
+
+# 파이썬 임시 파일
+__pycache__/
+*.pyc
+.venv/
