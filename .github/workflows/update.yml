@@ -1,4 +1,4 @@
-# KOSPI4848 자동 업데이트
+# 사팔사팔 자동 업데이트
 # GitHub 서버가 정해진 시간에 예측 프로그램을 돌리고, 결과를 사이트에 반영해요.
 # 시간은 UTC 기준이에요 (한국시간 = UTC + 9시간). GitHub 예약 실행은 몇 분~20분 늦게 시작될 수 있어요.
 name: update
@@ -40,8 +40,8 @@ jobs:
 
       - name: 결과 저장 (기록이 다음 실행에도 이어지도록)
         run: |
-          git config user.name "kospi4848-bot"
-          git config user.email "kospi4848-bot@users.noreply.github.com"
+          git config user.name "sapalsapal-bot"
+          git config user.email "sapalsapal-bot@users.noreply.github.com"
           git add site/
           git diff --cached --quiet || git commit -m "자동 업데이트 $(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M')"
           git push

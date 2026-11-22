@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KOSPI4848</title>
+<title>사팔사팔</title>
 <meta name="description" content="밤사이 해외 시장 흐름으로 계산한 코스피200·주요 종목의 예상 시작가와 오늘의 상방·하방 범위">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -267,7 +267,7 @@ footer { margin-top: 24px; font-size: 12px; color: var(--muted); border-top: 1px
 <div class="wrap">
   <header>
     <div>
-      <h1>KOSPI<span>4848</span></h1>
+      <h1>사팔<span>사팔</span></h1>
     </div>
     <button class="theme-btn" id="themeBtn" aria-label="화면 테마 바꾸기"></button>
   </header>
@@ -289,7 +289,7 @@ footer { margin-top: 24px; font-size: 12px; color: var(--muted); border-top: 1px
       <button data-info="caution">유의사항</button>
       <button data-info="faq">자주 묻는 질문</button>
     </nav>
-    <div class="foot-brand"><b>KOSPI4848</b> <span class="small">사팔사팔 · 짧게 사고파는 사람들을 위한 참고 지표</span></div>
+    <div class="foot-brand"><b>사팔사팔</b> <span class="small">짧게 사고파는 사람들을 위한 참고 지표</span></div>
     <p>본 사이트의 모든 수치는 통계 모델로 계산한 <b>참고용 정보</b>이며, 투자 권유나 매매 추천이 아닙니다.
     예측은 틀릴 수 있고, 투자 판단과 그 결과의 책임은 투자자 본인에게 있습니다.
     시세 데이터는 공개된 데이터를 사용하며 실시간 시세가 아닙니다.</p>
@@ -468,7 +468,7 @@ function expiryHtml(a) {
 /* ── 하단 안내 팝업 ── */
 const INFO = {
   about: ["사이트 소개", `
-    <p><b>KOSPI4848</b>(사팔사팔)은 짧게 사고파는 분들이 장 초반에 참고할 수 있도록,
+    <p><b>사팔사팔</b>은 짧게 사고파는 분들이 장 초반에 참고할 수 있도록,
     <b>코스피200과 주요 종목(삼성전자·SK하이닉스·삼성전기·현대차)의 오늘 상방·하방</b>을 매일 계산해 보여주는 사이트예요.</p>
     <h4>무엇을 보여주나요?</h4>
     <ul>
@@ -497,7 +497,7 @@ const INFO = {
     각 만기일 장 마감 가격이 80% 확률로 들어올 범위를 계산해요. 앞으로 코스피200 옵션 가격(내재변동성)을 연결해 더 정확하게 바꿀 예정이에요.</p>
     <h4>코스피 공포탐욕지수</h4>
     <p>주가 추세(125일 평균 대비), 변동성, 1년 중 주가 위치, 원화 흐름, 미국 VIX 다섯 가지를 각각 지난 1년 기준 0~100점으로 바꿔 평균 낸 값이에요.
-    KOSPI4848이 직접 계산한 지수라 다른 곳의 지수와 숫자가 다를 수 있어요.</p>
+    사팔사팔이 직접 계산한 지수라 다른 곳의 지수와 숫자가 다를 수 있어요.</p>
     <h4>성적표는 어떻게 계산하나요?</h4>
     <p>과거 각 날짜에 대해 <b>그날 이전 데이터만으로</b> 모델을 학습시켜 예측한 뒤 실제 결과와 비교해요. 미래 정보를 쓰지 않아서, 실제로 매일 예측했다면 나왔을 성적에 가까워요.</p>`],
   caution: ["유의사항", `
@@ -537,7 +537,7 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("#infoBg
 /* ── 선물·옵션 탭 ── */
 const EDU = `
   <div class="dhead"><h2>선물·옵션이란?</h2><span class="badge">처음 보는 분들을 위한 쉬운 설명</span></div>
-  <p class="small" style="margin-top:6px">코스피200 선물·옵션은 현물(주식) 가격에 큰 영향을 줘요. KOSPI4848의 예측에도 영향을 주는 핵심 개념만 쉽게 정리했어요.</p>
+  <p class="small" style="margin-top:6px">코스피200 선물·옵션은 현물(주식) 가격에 큰 영향을 줘요. 사팔사팔의 예측에도 영향을 주는 핵심 개념만 쉽게 정리했어요.</p>
   <div class="edu-grid">
     <div class="edu">
       <span class="tag">기본</span><h3>현물과 선물</h3>
@@ -591,7 +591,7 @@ const EDU = `
       <p>선물·옵션이 동시에 만기되는 3·6·9·12월 둘째 목요일은 <b>쿼드러플 위칭데이</b>라고 부르며 특히 주목받아요.</p>
     </div>
     <div class="edu wide">
-      <span class="tag">정리</span><h3>KOSPI4848 계산과의 연결</h3>
+      <span class="tag">정리</span><h3>사팔사팔 계산과의 연결</h3>
       <ul style="margin:6px 0;padding-left:18px">
         <li><b>9:30 상방·하방</b>: 지금은 시작가와 밤사이 미국 선물(나스닥·S&amp;P500) 등을 반영해요. 앞으로 <b>외국인 선물 순매수·미결제약정</b>을 추가해서 추세일을 더 잘 잡으려고 해요.</li>
         <li><b>만기 예측</b>: 지금은 최근 변동성 기반이에요. 앞으로 <b>위클리·월물 옵션의 내재변동성</b>으로 바꾸면 시장이 실제로 예상하는 폭을 반영할 수 있어요.</li>
@@ -682,7 +682,7 @@ function renderRef() {
     </div>
     <div class="section-t">최근 6개월 공포탐욕지수와 코스피</div>
     <div class="chart-box" style="height:240px"><canvas id="fgChart"></canvas></div>
-    <div class="note">KOSPI4848이 공개 데이터로 직접 계산한 지수예요. 다른 곳의 공포탐욕지수와는 계산 방식이 달라요.</div>
+    <div class="note">사팔사팔이 공개 데이터로 직접 계산한 지수예요. 다른 곳의 공포탐욕지수와는 계산 방식이 달라요.</div>
 
     <div class="section-t">이벤트 달력</div>
     ${R.events ? calMini() : ""}
@@ -781,9 +781,9 @@ function renderDetail() {
     ${afternoon}
     ${actual}`;
 
-  // 별도 위젯: 4848 AI의 과거 예측은?
+  // 별도 위젯: 사팔사팔 AI의 과거 예측은?
   $("#past").innerHTML = `
-    <div class="dhead"><h2>4848 AI의 과거 예측은?</h2><span class="badge">${a.name} · 최근 ${a.history.length}거래일</span></div>
+    <div class="dhead"><h2>사팔사팔 AI의 과거 예측은?</h2><span class="badge">${a.name} · 최근 ${a.history.length}거래일</span></div>
     <div class="small" style="margin-top:4px">캔들 = 실제 시세, 점선 = 9:30에 예측한 상방·하방 · 캔들을 누르면 그날 5분봉이 열려요</div>
     <div class="chart-box" style="margin-top:10px"><canvas id="chart"></canvas></div>
     <div class="stats" style="margin-top:12px;grid-template-columns:repeat(2,1fr)">

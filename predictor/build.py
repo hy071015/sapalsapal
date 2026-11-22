@@ -1,4 +1,4 @@
-"""KOSPI4848 예측 계산 프로그램
+"""사팔사팔 예측 계산 프로그램
 
 하루 흐름 (한국시간):
   16:10 저녁  - 오늘 실제 시세로 '내일 예비 예측' (미국장 반영 전)
@@ -701,7 +701,7 @@ def pct_rank(s: pd.Series, window=250) -> pd.Series:
 
 
 def kospi_fear_greed(daily):
-    """KOSPI4848 코스피 공포탐욕지수 (0=극단적 공포, 100=극단적 탐욕). 5가지 항목의 1년 내 위치를 평균."""
+    """사팔사팔 코스피 공포탐욕지수 (0=극단적 공포, 100=극단적 탐욕). 5가지 항목의 1년 내 위치를 평균."""
     k = daily["^KS11"].Close.dropna()
     vix = daily["^VIX"].Close.reindex(k.index, method="ffill")
     krw = daily["KRW=X"].Close.reindex(k.index, method="ffill")
