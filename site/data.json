@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-23 16:54",
+ "generated_at": "2026-11-23 17:44",
  "assets": [
   {
    "id": "kospi200",
@@ -1903,21 +1903,21 @@
    },
    "mid_stats": {
     "days": 250,
-    "up_rate": 26.4,
-    "dn_rate": 35.6,
-    "up_acc": 78.0,
-    "dn_acc": 74.4,
-    "up_gain": 24.2,
-    "dn_gain": 23.9,
-    "band_cover": 77.2,
-    "mae_close": 1.378,
-    "base_mae_close": 1.356,
+    "up_rate": 26.0,
+    "dn_rate": 36.0,
+    "up_acc": 77.6,
+    "dn_acc": 76.0,
+    "up_gain": 23.8,
+    "dn_gain": 25.9,
+    "band_cover": 76.4,
+    "mae_close": 1.383,
+    "base_mae_close": 1.369,
     "without_morning": {
-     "up_acc": 78.4,
+     "up_acc": 77.6,
      "dn_acc": 74.0,
-     "up_gain": 24.9,
-     "dn_gain": 23.6,
-     "band_cover": 75.6
+     "up_gain": 24.5,
+     "dn_gain": 25.6,
+     "band_cover": 75.2
     }
    },
    "open_stats": {
@@ -2902,21 +2902,21 @@
    },
    "mid_stats": {
     "days": 250,
-    "up_rate": 27.6,
+    "up_rate": 28.0,
     "dn_rate": 34.4,
     "up_acc": 77.2,
     "dn_acc": 72.0,
-    "up_gain": 23.0,
+    "up_gain": 24.3,
     "dn_gain": 23.2,
-    "band_cover": 72.8,
-    "mae_close": 1.835,
-    "base_mae_close": 1.824,
+    "band_cover": 73.6,
+    "mae_close": 1.861,
+    "base_mae_close": 1.836,
     "without_morning": {
-     "up_acc": 76.0,
-     "dn_acc": 72.0,
-     "up_gain": 20.7,
-     "dn_gain": 22.8,
-     "band_cover": 72.4
+     "up_acc": 75.2,
+     "dn_acc": 72.4,
+     "up_gain": 21.8,
+     "dn_gain": 22.7,
+     "band_cover": 72.8
     }
    },
    "open_stats": {
@@ -3899,19 +3899,19 @@
     "days": 250,
     "up_rate": 24.0,
     "dn_rate": 27.2,
-    "up_acc": 80.0,
+    "up_acc": 80.4,
     "dn_acc": 82.0,
-    "up_gain": 23.9,
-    "dn_gain": 32.7,
-    "band_cover": 77.6,
-    "mae_close": 1.701,
-    "base_mae_close": 1.684,
+    "up_gain": 24.9,
+    "dn_gain": 32.6,
+    "band_cover": 77.2,
+    "mae_close": 1.711,
+    "base_mae_close": 1.687,
     "without_morning": {
-     "up_acc": 80.4,
-     "dn_acc": 81.6,
-     "up_gain": 24.5,
-     "dn_gain": 34.9,
-     "band_cover": 77.2
+     "up_acc": 81.2,
+     "dn_acc": 82.0,
+     "up_gain": 25.3,
+     "dn_gain": 34.5,
+     "band_cover": 76.4
     }
    },
    "open_stats": {
@@ -4892,20 +4892,20 @@
    },
    "mid_stats": {
     "days": 250,
-    "up_rate": 20.0,
+    "up_rate": 19.2,
     "dn_rate": 35.6,
     "up_acc": 82.0,
-    "dn_acc": 79.6,
-    "up_gain": 20.4,
-    "dn_gain": 37.0,
+    "dn_acc": 79.2,
+    "up_gain": 18.5,
+    "dn_gain": 37.6,
     "band_cover": 82.4,
-    "mae_close": 1.208,
-    "base_mae_close": 1.17,
+    "mae_close": 1.21,
+    "base_mae_close": 1.175,
     "without_morning": {
-     "up_acc": 81.2,
+     "up_acc": 82.0,
      "dn_acc": 79.6,
-     "up_gain": 20.0,
-     "dn_gain": 37.4,
+     "up_gain": 18.1,
+     "dn_gain": 38.1,
      "band_cover": 83.2
     }
    },
@@ -5477,11 +5477,11 @@
    {
     "name": "WTI 유가",
     "unit": "달러",
-    "value": 82.91,
+    "value": 82.76,
     "date": "2026-11-23",
-    "chg": -1.07,
-    "chg_pct": -1.274,
-    "chg_20": -18.524,
+    "chg": -1.22,
+    "chg_pct": -1.453,
+    "chg_20": -18.671,
     "history": [
      [
       "06/04",
@@ -5961,18 +5961,18 @@
      ],
      [
       "11/23",
-      82.91
+      82.76
      ]
     ]
    },
    {
     "name": "브렌트 유가",
     "unit": "달러",
-    "value": 89.42,
+    "value": 89.2,
     "date": "2026-11-23",
-    "chg": -3.15,
-    "chg_pct": -3.403,
-    "chg_20": -22.787,
+    "chg": -3.37,
+    "chg_pct": -3.64,
+    "chg_20": -22.977,
     "history": [
      [
       "06/04",
@@ -6452,7 +6452,7 @@
      ],
      [
       "11/23",
-      89.42
+      89.2
      ]
     ]
    }
@@ -6465,7 +6465,7 @@
    "date": "2026-11-20"
   },
   "fear_greed": {
-   "score": 15.5,
+   "score": 15.6,
    "label": "극단적 공포",
    "date": "2026-11-23",
    "prev": 18.7,
@@ -6489,7 +6489,7 @@
     },
     {
      "name": "원화 흐름",
-     "score": 22.5,
+     "score": 23.3,
      "desc": "최근 20일 원/달러 (원화 약세일수록 공포)"
     },
     {
@@ -6977,7 +6977,7 @@
     ],
     [
      "11/23",
-     15.5
+     15.6
     ]
    ],
    "kospi": [
