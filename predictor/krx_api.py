@@ -7,6 +7,7 @@
 """
 from __future__ import annotations
 
+import datetime as dt
 import json
 import os
 import time
@@ -32,8 +33,9 @@ def api_key() -> str:
     return key
 
 
-def get(path: str, bas_dd: str, use_cache: bool = True) -> list[dict]:
-    """예: get('drv/opt_bydd_trd', '20261120'). 한 번 받은 날짜는 저장해 두고 다시 호출하지 않아요."""
+def get(path: str, bas_dd: str, use_cache: bool = True, keep=None) -> list[dict]:
+    """예: get('drv/opt_bydd_trd', '20261120'). 한 번 받은 날짜는 저장해 두고 다시 호출하지 않아요.
+    keep: 저장 전에 필요한 행만 남기는 함수 (옵션처럼 자료가 큰 경우)."""
     global _last
     f = CACHE / path.replace("/", "_") / f"{bas_dd}.json"
     if use_cache and f.exists():
@@ -46,6 +48,10 @@ def get(path: str, bas_dd: str, use_cache: bool = True) -> list[dict]:
     r.raise_for_status()
     data = r.json()
     rows = data.get("OutBlock_1", data if isinstance(data, list) else [])
+    if not rows and bas_dd >= (dt.date.today() - dt.timedelta(days=4)).strftime("%Y%m%d"):
+        return rows  # 최근 날짜가 비어 있으면 아직 안 나온 것일 수 있어서 저장하지 않아요
+    if keep:
+        rows = [r for r in rows if keep(r)]
     f.parent.mkdir(parents=True, exist_ok=True)
     f.write_text(json.dumps(rows, ensure_ascii=False), encoding="utf-8")
     return rows

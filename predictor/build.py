@@ -631,10 +631,16 @@ def run_asset(a, daily, intra, now, log, mode, bars5):
                for d, r in hist_wf.iterrows()]
     write_intraday(a["id"], bars5.get(a["ticker"], pd.DataFrame()), history, lv, now.strftime("%Y-%m-%d"))
     raw = daily[a["ticker"]]
+    o = float(raw.loc[today, "Open"]) if today in raw.index else 0.0
+    if not o > 0 and a["ticker"] in intra:
+        # 장중에는 야후 일봉 시작가가 0으로 나와요 → 1시간봉 첫 봉의 시작가 사용 (과거 61일×5종목 100% 일치 확인)
+        h = intra[a["ticker"]]
+        h = h[h.index.date == today.date()]  # intra는 한국시간 기준
+        o = float(h.Open.iloc[0]) if len(h) and h.Open.iloc[0] > 0 else 0.0
     in_open_window = dt.time(9, 25) <= now.time() < dt.time(15, 30)
-    if (is_trading_day(now.date()) and today in raw.index and today == next_day and raw.loc[today, "Open"] > 0
-            and (in_open_window or mode == "open")):
-        o = float(raw.loc[today, "Open"])
+    open_done = "open" in log.get(today_key, {}).get(a["id"], {})  # 예비 실행이 이미 발표한 값을 덮어쓰지 않게
+    if (is_trading_day(now.date()) and today == next_day and o > 0
+            and ((in_open_window and not open_done) or mode == "open")):
         row = df.iloc[[-1]].copy()
         row["gap"] = o / prev_close - 1
         po = open_predict(valid_o, row, f_open).iloc[0]
@@ -651,7 +657,8 @@ def run_asset(a, daily, intra, now, log, mode, bars5):
             morning_today = dict(p_gap=mt["pct"]["open"] / 100, p_hi=mt["pct"]["high"] / 100, p_lo=mt["pct"]["low"] / 100)
         midday, mid_stats = run_midday(df, kr, intra[a["ticker"]], wf_m[["p_gap", "p_hi", "p_lo"]], morning_today, today)
     in_mid_window = dt.time(MID_CUTOFF, 0) <= now.time() < dt.time(15, 30)
-    if midday and is_trading_day(now.date()) and (in_mid_window or mode == "midday"):
+    mid_done = "midday" in log.get(today_key, {}).get(a["id"], {})
+    if midday and is_trading_day(now.date()) and ((in_mid_window and not mid_done) or mode == "midday"):
         pc = midday["prev_close"]
         log.setdefault(today_key, {}).setdefault(a["id"], {})["midday"] = dict(
             at=stamp, m_open=lv(midday["m_open"]), m_high=lv(midday["m_high"]), m_low=lv(midday["m_low"]),
