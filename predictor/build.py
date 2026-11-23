@@ -631,12 +631,18 @@ def run_asset(a, daily, intra, now, log, mode, bars5):
                for d, r in hist_wf.iterrows()]
     write_intraday(a["id"], bars5.get(a["ticker"], pd.DataFrame()), history, lv, now.strftime("%Y-%m-%d"))
     raw = daily[a["ticker"]]
-    o = float(raw.loc[today, "Open"]) if today in raw.index else 0.0
-    if not o > 0 and a["ticker"] in intra:
-        # 장중에는 야후 일봉 시작가가 0으로 나와요 → 1시간봉 첫 봉의 시작가 사용 (과거 61일×5종목 100% 일치 확인)
+    # 오늘 시작가: 장중에는 야후 일봉 시작가가 0이거나 부정확해서 1시간봉 9시 봉의 시작가를 우선 사용
+    # (과거 61일×5종목 일봉 시작가와 100% 일치 확인)
+    o_daily = float(raw.loc[today, "Open"]) if today in raw.index else 0.0
+    o_hour = 0.0
+    if a["ticker"] in intra:
         h = intra[a["ticker"]]
         h = h[h.index.date == today.date()]  # intra는 한국시간 기준
-        o = float(h.Open.iloc[0]) if len(h) and h.Open.iloc[0] > 0 else 0.0
+        if len(h) and h.index[0].hour == 9 and h.Open.iloc[0] > 0:
+            o_hour = float(h.Open.iloc[0])
+    o = o_hour if o_hour > 0 else o_daily
+    if today == next_day:
+        print(f"  [{a['id']}] 오늘 시작가: 1시간봉 {o_hour} / 일봉 {o_daily} → {o}")
     in_open_window = dt.time(9, 25) <= now.time() < dt.time(15, 30)
     open_done = "open" in log.get(today_key, {}).get(a["id"], {})  # 예비 실행이 이미 발표한 값을 덮어쓰지 않게
     if (is_trading_day(now.date()) and today == next_day and o > 0

@@ -18,7 +18,12 @@ on:
     - cron: "20 4 * * 1-5"    #               13:20  오후 예비
     - cron: "15 7 * * 1-5"    #               16:15  실제 결과 기록
     - cron: "0 8 * * 1-5"     #               17:00  결과 예비
-  workflow_dispatch: {}        # GitHub 화면에서 직접 실행 버튼
+  workflow_dispatch:           # GitHub 화면에서 직접 실행 버튼
+    inputs:
+      mode:
+        description: "강제 단계 (비워두면 시간에 맞게 자동): morning / open / midday / evening"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -45,7 +50,8 @@ jobs:
       - name: 예측 계산
         env:
           TZ: Asia/Seoul
-        run: python predictor/build.py
+          MODE: ${{ github.event.inputs.mode }}
+        run: python predictor/build.py ${MODE:+--mode "$MODE"}
 
       - name: 결과 저장 (기록이 다음 실행에도 이어지도록)
         run: |
