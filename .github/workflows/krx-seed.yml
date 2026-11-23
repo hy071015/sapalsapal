@@ -1,5 +1,5 @@
 # KRX 과거 VKOSPI를 GitHub 내부 캐시(비공개)에 처음 한 번 채워두는 작업 (약 1시간, 수동 실행)
-# 캐시가 지워졌을 때도 이걸 다시 돌리면 돼요.
+# 중간에 끊겨도 받은 만큼은 저장되니, 다시 실행하면 이어서 받아요.
 name: krx-seed
 
 on:
@@ -22,7 +22,7 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - uses: actions/cache@v4
+      - uses: actions/cache/restore@v4
         with:
           path: data_private/krx_api
           key: krx-${{ github.run_id }}
@@ -33,3 +33,10 @@ jobs:
           TZ: Asia/Seoul
           KRX_API_KEY: ${{ secrets.KRX_API_KEY }}
         run: python predictor/krx_api.py
+
+      - name: 받은 만큼 저장 (실패해도)
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: data_private/krx_api
+          key: krx-${{ github.run_id }}

@@ -43,9 +43,16 @@ def get(path: str, bas_dd: str, use_cache: bool = True, keep=None) -> list[dict]
     wait = MIN_INTERVAL - (time.time() - _last)
     if wait > 0:
         time.sleep(wait)
-    r = requests.get(f"{BASE}/{path}", params={"basDd": bas_dd}, headers={"AUTH_KEY": api_key()}, timeout=30)
+    for attempt in range(6):  # 연결이 끊기면 잠깐 쉬었다가 다시 (최대 6번)
+        try:
+            r = requests.get(f"{BASE}/{path}", params={"basDd": bas_dd}, headers={"AUTH_KEY": api_key()}, timeout=30)
+            r.raise_for_status()
+            break
+        except (requests.ConnectionError, requests.Timeout, requests.HTTPError) as e:
+            if attempt == 5 or (isinstance(e, requests.HTTPError) and r.status_code in (401, 403)):
+                raise
+            time.sleep(5 * 2 ** attempt)
     _last = time.time()
-    r.raise_for_status()
     data = r.json()
     rows = data.get("OutBlock_1", data if isinstance(data, list) else [])
     if not rows and bas_dd >= (dt.date.today() - dt.timedelta(days=4)).strftime("%Y%m%d"):
