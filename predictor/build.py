@@ -626,6 +626,34 @@ def load_index_daily(a):
     return d.rename(columns=str.title)[["Open", "High", "Low", "Close", "Volume"]]
 
 
+def patch_stock_daily(a, daily):
+    """야후 종목 일봉의 최근 100일을 한투 값으로 덮어써요.
+    (야후는 당일 시작가를 장 마감 후에도 0으로 줘서 오늘 결과가 빠졌음, 2026-11-23)"""
+    try:
+        import kis_api
+        rows = kis_api.stock_daily_recent(a["ticker"].split(".")[0])
+    except Exception as e:  # noqa: BLE001
+        print(f"한투 일봉 실패 {a['id']}:", str(e)[:80])
+        return
+    if not rows or a["ticker"] not in daily:
+        return
+    now = now_kst()
+    today = now.strftime("%Y%m%d")
+    rows = [r for r in rows if r["date"] != today]  # 오늘 일봉은 16시 이후 시간외 거래로 종가가 바뀌어서 안 씀
+    if is_trading_day(now.date()) and now.time() >= dt.time(15, 31):
+        # 오늘: 한투 과거분봉 API의 1분봉으로 만들어요 (15:30 봉 = 종가 동시호가 확정 종가)
+        m = kis_api.minute_bars_day(a["ticker"].split(".")[0], today)
+        if m and m[-1][0] == "1530":
+            rows.append(dict(date=today, open=m[0][1], high=max(r[2] for r in m), low=min(r[3] for r in m),
+                             close=m[-1][4], volume=sum(r[5] for r in m)))
+    k = pd.DataFrame(rows)
+    k.index = pd.to_datetime(k.pop("date"))
+    k = k.rename(columns=str.title)[["Open", "High", "Low", "Close", "Volume"]]
+    y = daily[a["ticker"]]
+    y = y[~y.index.isin(k.index)]
+    daily[a["ticker"]] = pd.concat([y, k.reindex(columns=y.columns)]).sort_index()
+
+
 def collect_kis(now):
     """장중이면 한투 API로 종목별 스냅샷(현재가·외국인기관 추정·프로그램 매매·호가)을 받아 비공개 저장소에 쌓아요.
     (몇 달 쌓은 뒤 장중 수급 효과를 검증할 예정) 반환: {티커: 스냅샷}. 키가 없거나 실패하면 빈 dict."""
@@ -674,15 +702,12 @@ def collect_kis_minutes(now):
                     n += 1
                 continue
             if end > "0900":
-                m = kis_api.minute_bars(code, "J", "0859", end)  # 09:00 봉(시작 동시호가) 포함
-                # 15:20~15:30은 종가 동시호가라 체결이 없고 직전 가격만 반복돼요 → 빼고, 장 마감 뒤엔 확정 종가를 마지막 봉으로
-                m = [r for r in m if not (r[0] > "1520" and r[5] == 0)]
-                if m and end == "1530":
-                    p = kis_api.get(f"{kis_api.Q}/inquire-price", "FHKST01010100",
-                                    {"FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": code}).get("output") or {}
-                    c = float(p.get("stck_prpr") or 0)
-                    if c > 0:
-                        m.append(["1530", c, c, c, c, 0.0])
+                if end == "1530":  # 장 마감 뒤: 과거분봉 API (15:30 봉에 종가 동시호가 체결 포함, 시간외 거래 영향 없음)
+                    m = kis_api.minute_bars_day(code, now.strftime("%Y%m%d"))
+                else:  # 장중: 지금까지
+                    m = kis_api.minute_bars(code, "J", "0859", end)  # 09:00 봉(시작 동시호가) 포함
+                # 15:20~15:30 종가 동시호가 중에는 체결이 없어 직전 가격만 반복 → 뺌
+                m = [r for r in m if not (r[0] > "1520" and r[0] != "1530" and r[5] == 0)]
                 if m:
                     (folder / f"min_krx_{a['id']}.json").write_text(json.dumps(m), encoding="utf-8")
                     n += 1
@@ -1019,6 +1044,8 @@ def main():
                 raise SystemExit(f"{a['name']} 지수 일봉을 못 받았어요 (한투 연결 확인 필요)")
             daily[a["ticker"]] = d
             print(f"{a['name']} 실제 지수 일봉 {len(d)}일 (한투)")
+        else:
+            patch_stock_daily(a, daily)
     print("VKOSPI 받는 중... (KRX Open API)")
     vk = load_vkospi()
     print("1시간봉 받는 중...")

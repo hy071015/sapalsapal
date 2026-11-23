@@ -161,6 +161,25 @@ def minute_bars_day(code: str, day: str) -> list[list]:
     return [rows[k] for k in sorted(rows)]
 
 
+def stock_daily_recent(code: str, days: int = 100) -> list[dict]:
+    """종목 최근 일봉 (수정주가, 최대 100일). 반환: [{date, open, high, low, close, volume}] 시간순."""
+    end = dt.date.today()
+    start = end - dt.timedelta(days=int(days * 1.6))
+    d = get(f"{Q}/inquire-daily-itemchartprice", "FHKST03010100", {
+        "FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": code, "FID_INPUT_DATE_1": start.strftime("%Y%m%d"),
+        "FID_INPUT_DATE_2": end.strftime("%Y%m%d"), "FID_PERIOD_DIV_CODE": "D", "FID_ORG_ADJ_PRC": "0"})
+    out = []
+    for r in d.get("output2") or []:
+        try:
+            v = dict(date=r["stck_bsop_date"], open=float(r["stck_oprc"]), high=float(r["stck_hgpr"]),
+                     low=float(r["stck_lwpr"]), close=float(r["stck_clpr"]), volume=float(r.get("acml_vol") or 0))
+        except (KeyError, ValueError):
+            continue
+        if v["close"] > 0 and v["open"] > 0:
+            out.append(v)
+    return sorted(out, key=lambda x: x["date"])
+
+
 def index_daily(code: str = "2001", start: str = "20191101") -> list[dict]:
     """지수 일봉 (2001 = 코스피200). 한 번에 50일씩 거꾸로 받아요. 반환: [{date, open, high, low, close, volume}] 시간순."""
     end = dt.date.today()
