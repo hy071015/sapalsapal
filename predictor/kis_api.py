@@ -63,7 +63,7 @@ def get(path: str, tr_id: str, params: dict) -> dict:
             r = requests.get(f"{BASE}{path}", params=params, timeout=30, headers={
                 "content-type": "application/json; charset=utf-8", "authorization": f"Bearer {token()}",
                 "appkey": _env("KIS_APP_KEY"), "appsecret": _env("KIS_APP_SECRET"), "tr_id": tr_id, "custtype": "P"})
-        except (requests.ConnectionError, requests.Timeout) as e:
+        except requests.RequestException as e:  # 연결 끊김·시간 초과 등
             _last = time.time()
             if attempt == 3:
                 return {"rt_cd": "?", "msg1": str(e)[:200], "_status": 0}
@@ -135,6 +135,29 @@ def minute_bars(code: str, market: str = "J", start: str = "0900", end: str = "1
             if s_min < hmv <= e_min and c > 0:
                 rows[h] = [h, o, hi, lo, c, float(r.get("cntg_vol") or 0)]
         t -= 30
+    return [rows[k] for k in sorted(rows)]
+
+
+def minute_bars_day(code: str, day: str) -> list[list]:
+    """과거 하루치 1분봉 (종목, KRX, 09:00~15:30). day='YYYYMMDD'. 한 번에 120개씩 4번.
+    반환 형식은 minute_bars와 같아요. 15:30 봉은 종가 동시호가 체결(확정 종가)."""
+    rows = {}
+    for end in ("153000", "133000", "113000", "093000"):
+        d = get(f"{Q}/inquire-time-dailychartprice", "FHKST03010230", {
+            "FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": code, "FID_INPUT_HOUR_1": end,
+            "FID_INPUT_DATE_1": day, "FID_PW_DATA_INCU_YN": "N", "FID_FAKE_TICK_INCU_YN": ""})
+        if d.get("rt_cd") != "0":
+            break
+        for r in d.get("output2") or []:
+            if r.get("stck_bsop_date") != day:
+                continue
+            h = r.get("stck_cntg_hour", "")[:4]
+            try:
+                o, hi, lo, c = (float(r[k]) for k in ("stck_oprc", "stck_hgpr", "stck_lwpr", "stck_prpr"))
+            except (ValueError, KeyError):
+                continue
+            if "0900" <= h <= "1530" and c > 0:
+                rows[h] = [h, o, hi, lo, c, float(r.get("cntg_vol") or 0)]
     return [rows[k] for k in sorted(rows)]
 
 
