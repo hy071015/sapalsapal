@@ -1,5 +1,7 @@
 # KRX 원본 데이터 — 약관상 공개 금지. 절대 올리지 않아요.
 data_private/
+# 비공개 자료 저장소(sapalsapal-data)를 GitHub 실행 중에 받아두는 곳
+data_repo/
 
 # 5분봉 누적 원본 (야후 데이터 재배포 방지, 내 컴퓨터에만 보관)
 predictor/archive/

@@ -19,6 +19,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import os
 import warnings
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -599,7 +600,34 @@ def add_vkospi(df, vk):
     df["vk_rel"] = df.vk - np.log(pd.Series(v, index=dates).rolling(60).mean())
 
 
-def run_asset(a, daily, intra, now, log, mode, bars5, vk=None):
+DATA_DIR = Path(os.environ.get("SAPAL_DATA_DIR") or (ROOT / "data_private"))  # GitHub에선 비공개 저장소(sapalsapal-data)
+
+
+def collect_kis(now):
+    """장중이면 한투 API로 종목별 스냅샷(현재가·외국인기관 추정·프로그램 매매·호가)을 받아 비공개 저장소에 쌓아요.
+    (몇 달 쌓은 뒤 장중 수급 효과를 검증할 예정) 반환: {티커: 스냅샷}. 키가 없거나 실패하면 빈 dict."""
+    if not is_trading_day(now.date()) or not (dt.time(8, 30) <= now.time() <= dt.time(15, 45)):
+        return {}
+    try:
+        import kis_api
+        kis_api.token()
+    except Exception as e:  # noqa: BLE001
+        print("한투 API 연결 안 됨 (야후 값으로 계산):", str(e)[:120])
+        return {}
+    out = {}
+    folder = DATA_DIR / "kis" / now.strftime("%Y-%m-%d")
+    folder.mkdir(parents=True, exist_ok=True)
+    for a in ASSETS:
+        code = a["ticker"].split(".")[0]
+        snap = kis_api.snapshot(code)
+        snap["_at"] = now.strftime("%Y-%m-%d %H:%M:%S")
+        out[a["ticker"]] = snap
+        (folder / f"{now:%H%M}_{a['id']}.json").write_text(json.dumps(snap, ensure_ascii=False), encoding="utf-8")
+    print(f"한투 스냅샷 저장: {folder.name} {now:%H:%M} ({len(out)}종목)")
+    return out
+
+
+def run_asset(a, daily, intra, now, log, mode, bars5, vk=None, kis=None):
     kr = clean_korean(daily[a["ticker"]])
     df, f_morning, f_evening, next_day = build_frame(kr, a["drivers"], daily)
     use_vk = a.get("vkospi") and vk is not None
@@ -682,9 +710,14 @@ def run_asset(a, daily, intra, now, log, mode, bars5, vk=None):
         h = h[h.index.date == today.date()]  # intra는 한국시간 기준
         if len(h) and h.index[0].hour == 9 and h.Open.iloc[0] > 0:
             o_hour = float(h.Open.iloc[0])
-    o = o_hour if o_hour > 0 else o_daily
+    o_kis = 0.0
+    if kis:
+        import kis_api
+        o_kis = kis_api.today_open(kis)
+    # 한투(정확) > 야후 1시간봉 > 야후 일봉. 2026-11-23 삼성전자: 한투 177,600(실제) / 야후 178,000·176,600
+    o = o_kis if o_kis > 0 else (o_hour if o_hour > 0 else o_daily)
     if today == next_day:
-        print(f"  [{a['id']}] 오늘 시작가: 1시간봉 {o_hour} / 일봉 {o_daily} → {o}")
+        print(f"  [{a['id']}] 오늘 시작가: 한투 {o_kis} / 1시간봉 {o_hour} / 일봉 {o_daily} → {o}")
     in_open_window = dt.time(9, 25) <= now.time() < dt.time(15, 30)
     open_done = "open" in log.get(today_key, {}).get(a["id"], {})  # 예비 실행이 이미 발표한 값을 덮어쓰지 않게
     if (is_trading_day(now.date()) and today == next_day and o > 0
@@ -879,6 +912,7 @@ def main():
     intra = fetch_intraday([a["ticker"] for a in ASSETS])
     print("5분봉 받는 중... (매일 누적 저장)")
     bars5 = fetch_5m([a["ticker"] for a in ASSETS])
+    kis = collect_kis(now)
     missing = [t for t in tickers if t not in daily]
     if missing:
         print("받지 못한 데이터:", missing)
@@ -886,7 +920,7 @@ def main():
     log = json.loads(LOG.read_text(encoding="utf-8")) if LOG.exists() else {}
     results = []
     for a in ASSETS:
-        r = run_asset(a, daily, intra, now, log, args.mode, bars5, vk)
+        r = run_asset(a, daily, intra, now, log, args.mode, bars5, vk, kis.get(a["ticker"]))
         s, e, ms = r["stats"], r["evening_stats"], r["mid_stats"]
         print(f"\n[{r['name']}] {r['target_date']} ({'아침 확정' if r['kind'] == 'morning' else '저녁 예비'}) "
               f"예상 고가 {r['pred']['high']:,} / 저가 {r['pred']['low']:,}")

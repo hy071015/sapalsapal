@@ -55,10 +55,30 @@ jobs:
           key: krx-${{ github.run_id }}
           restore-keys: krx-
 
+      # 한투 장중 수급 원본은 비공개 저장소(sapalsapal-data)에 쌓아요 (공개 금지, 몇 달 모아서 검증용)
+      - name: 비공개 자료 저장소 가져오기
+        continue-on-error: true
+        uses: actions/checkout@v4
+        with:
+          repository: hy071015/sapalsapal-data
+          ssh-key: ${{ secrets.DATA_DEPLOY_KEY }}
+          path: data_repo
+
+      # 한투 접속 토큰은 하루 유효 → 매번 새로 받지 않게 보관
+      - name: 한투 토큰 불러오기
+        uses: actions/cache/restore@v4
+        with:
+          path: data_private/kis_token.json
+          key: kis-token-${{ github.run_id }}
+          restore-keys: kis-token-
+
       - name: 예측 계산
         env:
           TZ: Asia/Seoul
           KRX_API_KEY: ${{ secrets.KRX_API_KEY }}
+          KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
+          KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
+          SAPAL_DATA_DIR: data_repo
           MODE: ${{ github.event.inputs.mode }}
         run: python predictor/build.py ${MODE:+--mode "$MODE"}
 
@@ -73,6 +93,23 @@ jobs:
         with:
           path: data_private/krx_api
           key: krx-${{ github.run_id }}
+
+      - name: 한투 토큰 보관
+        if: ${{ hashFiles('data_private/kis_token.json') != '' }}
+        uses: actions/cache/save@v4
+        with:
+          path: data_private/kis_token.json
+          key: kis-token-${{ github.run_id }}
+
+      - name: 장중 수급 원본 저장 (비공개 저장소)
+        continue-on-error: true
+        working-directory: data_repo
+        run: |
+          git config user.name "sapalsapal-bot"
+          git config user.email "sapalsapal-bot@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || git commit -m "한투 스냅샷 $(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M')"
+          git push
 
       - name: 결과 저장 (기록이 다음 실행에도 이어지도록)
         run: |
