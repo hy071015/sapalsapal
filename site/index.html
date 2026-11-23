@@ -322,7 +322,8 @@ footer { margin-top: 24px; font-size: 12px; color: var(--muted); border-top: 1px
     <div class="foot-brand"><b>사팔사팔</b> <span class="small">짧게 사고파는 사람들을 위한 참고 지표</span></div>
     <p>본 사이트의 모든 수치는 통계 모델로 계산한 <b>참고용 정보</b>이며, 투자 권유나 매매 추천이 아닙니다.
     예측은 틀릴 수 있고, 투자 판단과 그 결과의 책임은 투자자 본인에게 있습니다.
-    시세 데이터는 공개된 데이터를 사용하며 실시간 시세가 아닙니다.</p>
+    시세 데이터는 공개된 데이터를 사용하며 실시간 시세가 아닙니다.
+    VKOSPI 출처: <b>한국거래소 통계정보</b>.</p>
   </footer>
 </div>
 
@@ -517,6 +518,7 @@ const INFO = {
     <h4>9:30 상방·하방</h4>
     <p>실제 <b>시작가</b>를 기준점으로, 밤사이 미국 시장(나스닥·S&amp;P500 선물, 한국 ETF(EWY), 반도체지수, 엔비디아·마이크론 등),
     공포지수(VIX), 원/달러 환율, 최근 변동폭과 흐름을 함께 넣어 계산해요.
+    코스피200은 여기에 전날 <b>VKOSPI</b>(코스피 공포지수, 한국거래소 통계정보)도 함께 넣어요. 검증해 보니 코스피200에서만 효과가 있었어요.
     과거 약 6년 동안 "이런 날엔 시작가에서 위로·아래로 이만큼 움직였다"는 관계를 통계 모델(분위 회귀)로 학습했고,
     상방·하방은 평균이 아니라 <b>가장 흔하게 나온 값(중앙값)</b>을 맞히도록 만들었어요. 모델은 20거래일마다 최신 데이터로 다시 학습해요.</p>
     <h4>오후 예측 (12:30)</h4>
@@ -625,7 +627,7 @@ const EDU = `
       <ul style="margin:6px 0;padding-left:18px">
         <li><b>9:30 상방·하방</b>: 지금은 시작가와 밤사이 미국 선물(나스닥·S&amp;P500) 등을 반영해요. 앞으로 <b>외국인 선물 순매수·미결제약정</b>을 추가해서 추세일을 더 잘 잡으려고 해요.</li>
         <li><b>만기 예측</b>: 지금은 최근 변동성 기반이에요. 앞으로 <b>위클리·월물 옵션의 내재변동성</b>으로 바꾸면 시장이 실제로 예상하는 폭을 반영할 수 있어요.</li>
-        <li><b>참고지표</b>: <b>VKOSPI</b>를 KRX 데이터 연결 후 추가할 예정이에요.</li>
+        <li><b>참고지표</b>: <b>VKOSPI</b>(한국거래소 통계정보)를 함께 보여줘요.</li>
       </ul>
       <p class="small">선물·옵션은 원금 이상의 손실이 날 수 있는 고위험 상품이에요. 이 설명은 개념 이해를 위한 것이며 거래를 권하는 것이 아니에요.</p>
     </div>
@@ -723,8 +725,13 @@ function renderRef() {
         <div class="val">${x.value.toLocaleString("ko-KR")}<span style="font-size:13px;font-weight:500"> ${x.unit}</span></div>
         <div class="chg"><span class="${cls(x.chg)}">${x.chg > 0 ? "+" : ""}${x.chg} (${sign(x.chg_pct)})</span> <span class="small">· 20일 ${sign(x.chg_20)}</span></div>
         <div class="spark"><canvas id="spark${i}"></canvas></div><div class="small">${x.date} 기준 · 최근 6개월</div></div>`).join("")}
-      <div class="ref empty"><div class="nm">코스피 VIX (VKOSPI)</div><div class="val">KRX 데이터 연결 후 표시 예정</div>
-        <div class="small" style="margin-top:6px">코스피200 옵션 가격으로 계산하는 코스피 공포지수예요.</div></div>
+      ${R.vkospi ? `<div class="ref"><div class="nm">코스피 VIX (VKOSPI)</div>
+        <div class="val">${R.vkospi.value}</div>
+        <div class="chg"><span class="${cls(R.vkospi.chg)}">${R.vkospi.chg > 0 ? "+" : ""}${R.vkospi.chg} (${sign(R.vkospi.chg_pct)})</span> <span class="small">· 20일 ${sign(R.vkospi.chg_20)}</span></div>
+        <div class="small" style="margin-top:6px">코스피200 옵션 가격으로 계산한 코스피 공포지수예요. 높을수록 시장이 크게 흔들릴 것으로 예상된다는 뜻이에요.</div>
+        <div class="small">${R.vkospi.date} 기준 · 출처: 한국거래소 통계정보</div></div>`
+      : `<div class="ref empty"><div class="nm">코스피 VIX (VKOSPI)</div><div class="val">오늘은 불러오지 못했어요</div>
+        <div class="small" style="margin-top:6px">코스피200 옵션 가격으로 계산하는 코스피 공포지수예요.</div></div>`}
     </div>`;
 
   const muted = css("--muted"), line = css("--line"), text = css("--text");

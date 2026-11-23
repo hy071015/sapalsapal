@@ -8,6 +8,7 @@ predictor/archive/
 .claude/
 PROJECT_NOTES.md
 save_krx*.ps1
+save_kis*.ps1
 *.env
 .env*
 

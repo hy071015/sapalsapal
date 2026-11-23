@@ -37,7 +37,7 @@ LOG = ROOT / "site" / "log.json"
 # 예측할 종목과, 각 종목에 영향을 주는 해외 지표(첫 번째가 가장 중요한 지표)
 ASSETS = [
     dict(id="kospi200", name="코스피200", ticker="069500.KS", level_ticker="^KS200",
-         unit="pt", decimals=2, drivers=["NQ=F", "ES=F", "EWY"]),
+         unit="pt", decimals=2, drivers=["NQ=F", "ES=F", "EWY"], vkospi=True),
     dict(id="samsung", name="삼성전자", ticker="005930.KS", unit="원", decimals=0,
          drivers=["EWY", "^SOX", "NQ=F", "MU", "NVDA"]),
     dict(id="hynix", name="SK하이닉스", ticker="000660.KS", unit="원", decimals=0,
@@ -566,9 +566,42 @@ def expiry_ranges(kr: pd.DataFrame, lv) -> list[dict]:
 
 
 # ───────────────────────────── 종목별 실행 ─────────────────────────────
-def run_asset(a, daily, intra, now, log, mode, bars5):
+VK_FEATS = ["vk", "vk_chg", "vk_rel"]
+VK_MIN_DAYS = 600  # VKOSPI 과거 자료가 이만큼 없으면 VKOSPI 없이 계산
+
+
+def load_vkospi():
+    """KRX Open API에서 VKOSPI를 받아요. 키가 없거나 연결이 안 되면 None (그날은 VKOSPI 없이 계산)."""
+    try:
+        import krx_api
+        v = krx_api.vkospi(holidays=KR_HOLIDAYS, max_fetch=15)  # 과거 전체는 krx-seed 작업이 채워둠
+    except Exception as e:  # noqa: BLE001
+        print("VKOSPI 못 받음 (VKOSPI 없이 계산):", str(e)[:100])
+        return None
+    s = pd.Series(v, dtype=float)
+    if len(s) < VK_MIN_DAYS:
+        print(f"VKOSPI 자료가 부족해요 ({len(s)}일) → VKOSPI 없이 계산")
+        return None
+    s.index = pd.to_datetime(s.index)
+    return s.sort_index()
+
+
+def add_vkospi(df, vk):
+    """전날 VKOSPI (KRX가 다음 날 아침에 발표 → 9:30 예측에 사용 가능). 2026-11 검증: 코스피200만 효과 있음."""
+    dates = df.index
+    prev = dates[:-1].insert(0, dates[0] - pd.Timedelta(days=1))
+    v = asof_before(vk, dates)
+    df["vk"] = np.log(v)
+    df["vk_chg"] = df.vk - np.log(asof_before(vk, prev))
+    df["vk_rel"] = df.vk - np.log(pd.Series(v, index=dates).rolling(60).mean())
+
+
+def run_asset(a, daily, intra, now, log, mode, bars5, vk=None):
     kr = clean_korean(daily[a["ticker"]])
     df, f_morning, f_evening, next_day = build_frame(kr, a["drivers"], daily)
+    use_vk = a.get("vkospi") and vk is not None
+    if use_vk:
+        add_vkospi(df, vk)
     need = TARGETS + ["base_hi", "base_lo"]
     valid_m = df.iloc[:-1].dropna(subset=f_morning + need)
     valid_e = df.iloc[:-1].dropna(subset=f_evening + need)
@@ -621,9 +654,13 @@ def run_asset(a, daily, intra, now, log, mode, bars5):
         log[tgt].pop(a["id"])
 
     # 시가 반영 (9:30): 오늘 실제 시가를 알면 범위를 다시 계산
-    f_open = f_morning + ["gap"]
-    valid_o = valid_m.dropna(subset=["Open"])
+    f_open = f_morning + ["gap"] + (VK_FEATS if use_vk else [])
+    valid_o = valid_m.dropna(subset=["Open"] + (VK_FEATS if use_vk else []))
+    if use_vk and df[VK_FEATS].iloc[-1].isna().any():  # 오늘 쓸 전날 VKOSPI가 없으면 원래 모델로
+        f_open, valid_o = f_morning + ["gap"], valid_m.dropna(subset=["Open"])
+        use_vk = False
     hist_wf, open_stats = open_eval(valid_o, f_open, wf_m[["p_hi", "p_lo"]])
+    open_stats["vkospi"] = bool(use_vk)
     # 차트용: 실제 캔들(시작가·고가·저가·종가)과 9:30 예상 상방·하방을 가격(코스피200은 포인트)으로
     history = [dict(date=d.strftime("%m/%d"), day=d.strftime("%Y-%m-%d"), o=lv(r.Open), h=lv(r.High), l=lv(r.Low), c=lv(r.Close),
                     pc=lv(r.prev_close), ph=lv(r.prev_close * (1 + r.p_hi)), pl=lv(r.prev_close * (1 + r.p_lo)),
@@ -831,6 +868,8 @@ def main():
                      | {t for a in ASSETS for t in a["drivers"]} | set(COMMON) | {"EWY", "^KS11"} | set(REF_TICKERS))
     print(f"[{now:%Y-%m-%d %H:%M}] 일별 시세 받는 중... ({len(tickers)}개)")
     daily = fetch_daily(tickers)
+    print("VKOSPI 받는 중... (KRX Open API)")
+    vk = load_vkospi()
     print("1시간봉 받는 중...")
     intra = fetch_intraday([a["ticker"] for a in ASSETS])
     print("5분봉 받는 중... (매일 누적 저장)")
@@ -842,7 +881,7 @@ def main():
     log = json.loads(LOG.read_text(encoding="utf-8")) if LOG.exists() else {}
     results = []
     for a in ASSETS:
-        r = run_asset(a, daily, intra, now, log, args.mode, bars5)
+        r = run_asset(a, daily, intra, now, log, args.mode, bars5, vk)
         s, e, ms = r["stats"], r["evening_stats"], r["mid_stats"]
         print(f"\n[{r['name']}] {r['target_date']} ({'아침 확정' if r['kind'] == 'morning' else '저녁 예비'}) "
               f"예상 고가 {r['pred']['high']:,} / 저가 {r['pred']['low']:,}")
@@ -867,6 +906,10 @@ def main():
 
     LOG.write_text(json.dumps(dict(sorted(log.items())), ensure_ascii=False, indent=1), encoding="utf-8")
     ref = reference(daily)
+    if vk is not None and len(vk) >= 21:  # 참고지표 카드용 (화면에 '한국거래소 통계정보' 출처 표시)
+        ref["vkospi"] = dict(value=round(float(vk.iloc[-1]), 2), chg=round(float(vk.iloc[-1] - vk.iloc[-2]), 2),
+                             chg_pct=pct(vk.iloc[-1] / vk.iloc[-2] - 1), chg_20=pct(vk.iloc[-1] / vk.iloc[-21] - 1),
+                             date=vk.index[-1].strftime("%Y-%m-%d"))
     fg = ref["fear_greed"]
     print(f"\n[참고지표] 코스피 공포탐욕지수 {fg['score']} ({fg['label']}) · "
           + " · ".join(f"{x['name']} {x['value']}{x['unit']}" for x in ref["items"]))

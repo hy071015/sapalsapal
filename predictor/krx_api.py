@@ -55,3 +55,44 @@ def get(path: str, bas_dd: str, use_cache: bool = True, keep=None) -> list[dict]
     f.parent.mkdir(parents=True, exist_ok=True)
     f.write_text(json.dumps(rows, ensure_ascii=False), encoding="utf-8")
     return rows
+
+
+VK_PATH = "idx/drvprod_dd_trd"
+VK_START = "2020-07-01"
+
+
+def is_vkospi(r) -> bool:
+    return "변동성지수" in r.get("IDX_NM", "") and "200" in r.get("IDX_NM", "")
+
+
+def is_cached(path: str, bas_dd: str) -> bool:
+    return (CACHE / path.replace("/", "_") / f"{bas_dd}.json").exists()
+
+
+def vkospi(holidays=(), start: str = VK_START, max_fetch: int | None = None):
+    """코스피200 변동성지수(VKOSPI) 일별 종가. 저장 안 된 날짜만 KRX에서 받아요 (처음엔 오래 걸림).
+    오늘 자료는 내일 아침에 나오므로 어제까지만. 반환: {날짜: 종가} (pandas 없이)
+    max_fetch: 새로 받을 최대 날짜 수 (매일 실행에서는 최근 며칠만 받게 제한)"""
+    out, fetched = {}, 0
+    d, end = dt.date.fromisoformat(start), dt.date.today() - dt.timedelta(days=1)
+    while d <= end:
+        s = d.strftime("%Y%m%d")
+        if d.weekday() < 5 and d.isoformat() not in holidays:
+            if not is_cached(VK_PATH, s):
+                if max_fetch is not None and fetched >= max_fetch:
+                    d += dt.timedelta(days=1)
+                    continue
+                fetched += 1
+            for r in get(VK_PATH, s, keep=is_vkospi):
+                if is_vkospi(r):
+                    try:
+                        out[d] = float(str(r["CLSPRC_IDX"]).replace(",", ""))
+                    except ValueError:
+                        pass
+        d += dt.timedelta(days=1)
+    return out
+
+
+if __name__ == "__main__":  # GitHub에서 미리 채워두기용: python predictor/krx_api.py
+    v = vkospi()
+    print(f"VKOSPI {len(v)}일", max(v) if v else "")

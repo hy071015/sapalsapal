@@ -47,9 +47,18 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      # KRX 원본(VKOSPI)은 약관상 공개 저장소에 올리면 안 돼서, GitHub 내부 캐시(비공개)에만 보관해요.
+      - name: KRX 자료 캐시 불러오기
+        uses: actions/cache@v4
+        with:
+          path: data_private/krx_api
+          key: krx-${{ github.run_id }}
+          restore-keys: krx-
+
       - name: 예측 계산
         env:
           TZ: Asia/Seoul
+          KRX_API_KEY: ${{ secrets.KRX_API_KEY }}
           MODE: ${{ github.event.inputs.mode }}
         run: python predictor/build.py ${MODE:+--mode "$MODE"}
 

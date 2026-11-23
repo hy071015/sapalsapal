@@ -1,0 +1,35 @@
+# KRX 과거 VKOSPI를 GitHub 내부 캐시(비공개)에 처음 한 번 채워두는 작업 (약 1시간, 수동 실행)
+# 캐시가 지워졌을 때도 이걸 다시 돌리면 돼요.
+name: krx-seed
+
+on:
+  workflow_dispatch: {}
+
+concurrency:
+  group: krx-seed
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - uses: actions/cache@v4
+        with:
+          path: data_private/krx_api
+          key: krx-${{ github.run_id }}
+          restore-keys: krx-
+
+      - name: VKOSPI 과거 자료 받기
+        env:
+          TZ: Asia/Seoul
+          KRX_API_KEY: ${{ secrets.KRX_API_KEY }}
+        run: python predictor/krx_api.py
