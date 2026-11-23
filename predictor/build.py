@@ -538,12 +538,15 @@ def ewma_vol(close: pd.Series, lam=0.94) -> pd.Series:
     return np.sqrt((r ** 2).ewm(alpha=1 - lam, adjust=False).mean())
 
 
-def expiry_ranges(kr: pd.DataFrame, lv) -> list[dict]:
-    """만기일 종가가 80% 확률로 들어올 범위.
-    지금은 '최근 변동성(EWMA) × 과거에 실제로 나타난 움직임의 분포'로 계산해요.
-    TODO(KRX): 해당 만기 옵션의 내재변동성(시장이 예상하는 변동폭)으로 바꾸면 더 정확해져요."""
+def expiry_ranges(kr: pd.DataFrame, lv, vk_vol: pd.Series | None = None) -> list[dict]:
+    """만기일 종가가 80% 확률로 들어올 범위 = 변동성 × 과거에 실제로 나타난 움직임의 분포.
+    변동성: 코스피200은 VKOSPI(시장이 예상하는 변동폭), 종목은 최근 변동성(EWMA).
+    (2026-11 검증: 코스피200은 VKOSPI가 같은 적중률에 범위가 더 좁음(구간점수 4~7% 개선),
+     종목은 옵션 내재변동성을 써도 개선 없음 → 최근 변동성 유지)"""
     close = kr.Close
-    vol = ewma_vol(close)
+    vol, method = ewma_vol(close), "최근 변동성 기반"
+    if vk_vol is not None and pd.notna(vk_vol.iloc[-1]) and vk_vol.notna().sum() >= VK_MIN_DAYS:
+        vol, method = vk_vol, "VKOSPI(한국거래소 통계정보) 기반"
     base = kr.index[-1]
     out = []
     for key, label, exp in expiry_dates(base):
@@ -561,7 +564,7 @@ def expiry_ranges(kr: pd.DataFrame, lv) -> list[dict]:
         lo, hi = c * np.exp(-k * s), c * np.exp(k * s)
         out.append(dict(key=key, label=label, date=exp.strftime("%Y-%m-%d"), days=n,
                         low=lv(lo), high=lv(hi), low_pct=pct(lo / c - 1), high_pct=pct(hi / c - 1),
-                        cover=round(cover, 1), method="최근 변동성 기반 (옵션 데이터 연결 예정)"))
+                        cover=round(cover, 1), method=method))
     return out
 
 
@@ -600,8 +603,10 @@ def run_asset(a, daily, intra, now, log, mode, bars5, vk=None):
     kr = clean_korean(daily[a["ticker"]])
     df, f_morning, f_evening, next_day = build_frame(kr, a["drivers"], daily)
     use_vk = a.get("vkospi") and vk is not None
+    vk_vol = None
     if use_vk:
         add_vkospi(df, vk)
+        vk_vol = (vk / 100 / np.sqrt(252)).reindex(kr.index).ffill(limit=3)  # 만기 예측용 하루 변동성
     need = TARGETS + ["base_hi", "base_lo"]
     valid_m = df.iloc[:-1].dropna(subset=f_morning + need)
     valid_e = df.iloc[:-1].dropna(subset=f_evening + need)
@@ -732,7 +737,7 @@ def run_asset(a, daily, intra, now, log, mode, bars5, vk=None):
         pred_pct=dict(open=pct(pred.p_gap), high=pct(pred.p_hi), low=pct(pred.p_lo), close=pct(pred.p_cl)),
         drivers=drivers, stats=day_stats(wf_m), evening_stats=day_stats(wf_e), history=history,
         today=dict(date=today_key, **log[today_key][a["id"]]) if a["id"] in log.get(today_key, {}) else None,
-        mid_stats=mid_stats, open_stats=open_stats, live=live, expiry=expiry_ranges(kr, lv),
+        mid_stats=mid_stats, open_stats=open_stats, live=live, expiry=expiry_ranges(kr, lv, vk_vol),
     )
 
 
