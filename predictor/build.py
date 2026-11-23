@@ -37,7 +37,8 @@ LOG = ROOT / "site" / "log.json"
 
 # 예측할 종목과, 각 종목에 영향을 주는 해외 지표(첫 번째가 가장 중요한 지표)
 ASSETS = [
-    dict(id="kospi200", name="코스피200", ticker="069500.KS", level_ticker="^KS200",
+    # 코스피200: 실제 지수 (일봉은 한투, 과거 분봉은 야후 ^KS200, 오늘 분봉은 한투). 2026-11-23 KODEX200 ETF 환산에서 변경
+    dict(id="kospi200", name="코스피200", ticker="^KS200", kis_index="2001",
          unit="pt", decimals=2, drivers=["NQ=F", "ES=F", "EWY"], vkospi=True),
     dict(id="samsung", name="삼성전자", ticker="005930.KS", unit="원", decimals=0,
          drivers=["EWY", "^SOX", "NQ=F", "MU", "NVDA"]),
@@ -603,6 +604,28 @@ def add_vkospi(df, vk):
 DATA_DIR = Path(os.environ.get("SAPAL_DATA_DIR") or (ROOT / "data_private"))  # GitHub에선 비공개 저장소(sapalsapal-data)
 
 
+def load_index_daily(a):
+    """코스피200 실제 지수 일봉 (한투). 성공하면 비공개 저장소에 보관, 실패하면 보관본 사용."""
+    cache = DATA_DIR / f"index_daily_{a['id']}.json"
+    rows = []
+    try:
+        import kis_api
+        rows = kis_api.index_daily(a["kis_index"])
+    except Exception as e:  # noqa: BLE001
+        print("한투 지수 일봉 실패:", str(e)[:100])
+    if len(rows) >= 1000:
+        cache.parent.mkdir(parents=True, exist_ok=True)
+        cache.write_text(json.dumps(rows), encoding="utf-8")
+    elif cache.exists():
+        print("한투 지수 일봉 대신 보관본 사용")
+        rows = json.loads(cache.read_text(encoding="utf-8"))
+    if not rows:
+        return None
+    d = pd.DataFrame(rows)
+    d.index = pd.to_datetime(d.pop("date"))
+    return d.rename(columns=str.title)[["Open", "High", "Low", "Close", "Volume"]]
+
+
 def collect_kis(now):
     """장중이면 한투 API로 종목별 스냅샷(현재가·외국인기관 추정·프로그램 매매·호가)을 받아 비공개 저장소에 쌓아요.
     (몇 달 쌓은 뒤 장중 수급 효과를 검증할 예정) 반환: {티커: 스냅샷}. 키가 없거나 실패하면 빈 dict."""
@@ -619,7 +642,7 @@ def collect_kis(now):
     folder.mkdir(parents=True, exist_ok=True)
     for a in ASSETS:
         code = a["ticker"].split(".")[0]
-        snap = kis_api.snapshot(code)
+        snap = kis_api.index_price(a["kis_index"]) if a.get("kis_index") else kis_api.snapshot(code)
         snap["_at"] = now.strftime("%Y-%m-%d %H:%M:%S")
         out[a["ticker"]] = snap
         (folder / f"{now:%H%M}_{a['id']}.json").write_text(json.dumps(snap, ensure_ascii=False), encoding="utf-8")
@@ -644,6 +667,12 @@ def collect_kis_minutes(now):
     for a in ASSETS:
         code = a["ticker"].split(".")[0]
         try:
+            if a.get("kis_index"):  # 지수: 5분봉 (NXT 없음)
+                m = kis_api.index_5m_bars(a["kis_index"]) if end > "0900" else []
+                if m:
+                    (folder / f"min5_idx_{a['id']}.json").write_text(json.dumps(m), encoding="utf-8")
+                    n += 1
+                continue
             if end > "0900":
                 m = kis_api.minute_bars(code, "J", "0859", end)  # 09:00 봉(시작 동시호가) 포함
                 # 15:20~15:30은 종가 동시호가라 체결이 없고 직전 가격만 반복돼요 → 빼고, 장 마감 뒤엔 확정 종가를 마지막 봉으로
@@ -670,12 +699,13 @@ def collect_kis_minutes(now):
 def kis_minutes_frame(asset_id):
     """비공개 저장소에 쌓인 한투 1분봉 → 한국시간 DataFrame (봉 시작 시각 기준)."""
     parts = []
-    for f in sorted((DATA_DIR / "kis").glob(f"*/min_krx_{asset_id}.json")):
+    files = [(f, 1) for f in (DATA_DIR / "kis").glob(f"*/min_krx_{asset_id}.json")] +             [(f, 5) for f in (DATA_DIR / "kis").glob(f"*/min5_idx_{asset_id}.json")]  # (파일, 봉 길이 분)
+    for f, width in sorted(files):
         rows = json.loads(f.read_text(encoding="utf-8"))
         if not rows:
             continue
         end = pd.to_datetime([f"{f.parent.name} {r[0][:2]}:{r[0][2:]}" for r in rows]).tz_localize(KST)
-        start = end - pd.Timedelta(minutes=1)
+        start = end - pd.Timedelta(minutes=width)
         idx = start.where(end.time != dt.time(9, 0), end)  # 09:00 시작 동시호가 봉은 9시 봉에 포함
         parts.append(pd.DataFrame([r[1:] for r in rows], index=idx, columns=["Open", "High", "Low", "Close", "Volume"]))
     return pd.concat(parts).sort_index() if parts else pd.DataFrame()
@@ -982,6 +1012,13 @@ def main():
                      | {t for a in ASSETS for t in a["drivers"]} | set(COMMON) | {"EWY", "^KS11"} | set(REF_TICKERS))
     print(f"[{now:%Y-%m-%d %H:%M}] 일별 시세 받는 중... ({len(tickers)}개)")
     daily = fetch_daily(tickers)
+    for a in ASSETS:
+        if a.get("kis_index"):
+            d = load_index_daily(a)
+            if d is None:
+                raise SystemExit(f"{a['name']} 지수 일봉을 못 받았어요 (한투 연결 확인 필요)")
+            daily[a["ticker"]] = d
+            print(f"{a['name']} 실제 지수 일봉 {len(d)}일 (한투)")
     print("VKOSPI 받는 중... (KRX Open API)")
     vk = load_vkospi()
     print("1시간봉 받는 중...")

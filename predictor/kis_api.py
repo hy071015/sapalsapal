@@ -138,9 +138,67 @@ def minute_bars(code: str, market: str = "J", start: str = "0900", end: str = "1
     return [rows[k] for k in sorted(rows)]
 
 
+def index_daily(code: str = "2001", start: str = "20191101") -> list[dict]:
+    """지수 일봉 (2001 = 코스피200). 한 번에 50일씩 거꾸로 받아요. 반환: [{date, open, high, low, close, volume}] 시간순."""
+    end = dt.date.today()
+    out = {}
+    while True:
+        d = get(f"{Q}/inquire-daily-indexchartprice", "FHKUP03500100", {
+            "FID_COND_MRKT_DIV_CODE": "U", "FID_INPUT_ISCD": code, "FID_INPUT_DATE_1": start,
+            "FID_INPUT_DATE_2": end.strftime("%Y%m%d"), "FID_PERIOD_DIV_CODE": "D"})
+        rows = d.get("output2") or []
+        if d.get("rt_cd") != "0" or not rows:
+            break
+        oldest = None
+        for r in rows:
+            try:
+                day = r["stck_bsop_date"]
+                v = dict(date=day, open=float(r["bstp_nmix_oprc"]), high=float(r["bstp_nmix_hgpr"]),
+                         low=float(r["bstp_nmix_lwpr"]), close=float(r["bstp_nmix_prpr"]), volume=float(r.get("acml_vol") or 0))
+            except (KeyError, ValueError):
+                continue
+            if v["close"] > 0:
+                out[day] = v
+                oldest = day if oldest is None or day < oldest else oldest
+        if oldest is None or oldest <= start:
+            break
+        end = dt.date(int(oldest[:4]), int(oldest[4:6]), int(oldest[6:])) - dt.timedelta(days=1)
+    return [out[k] for k in sorted(out)]
+
+
+def index_price(code: str = "2001") -> dict:
+    d = get(f"{Q}/inquire-index-price", "FHPUP02100000", {"FID_COND_MRKT_DIV_CODE": "U", "FID_INPUT_ISCD": code})
+    return {"price": {"output": d.get("output")}} if d.get("rt_cd") == "0" else {"price_error": d.get("msg1", "")}
+
+
+def index_5m_bars(code: str = "2001") -> list[list]:
+    """오늘 지수 5분봉 [[끝시각 'HHMM', 시, 고, 저, 종, 0], ...] 시간순 (09:00 = 시작 지수)."""
+    d = get(f"{Q}/inquire-time-indexchartprice", "FHKUP03500200", {
+        "FID_COND_MRKT_DIV_CODE": "U", "FID_INPUT_ISCD": code, "FID_INPUT_HOUR_1": "300",
+        "FID_PW_DATA_INCU_YN": "Y", "FID_ETC_CLS_CODE": "0"})
+    today = dt.date.today().strftime("%Y%m%d")
+    rows = {}
+    for r in d.get("output2") or []:
+        h = r.get("stck_cntg_hour", "")
+        if r.get("stck_bsop_date") != today or not h[:4].isdigit() or h.startswith("88"):
+            continue
+        try:
+            o, hi, lo, c = (float(r[k]) for k in ("bstp_nmix_oprc", "bstp_nmix_hgpr", "bstp_nmix_lwpr", "bstp_nmix_prpr"))
+        except (KeyError, ValueError):
+            continue
+        if c > 0 and "0900" <= h[:4] <= "1530":
+            rows[h[:4]] = [h[:4], o, hi, lo, c, 0.0]
+    return [rows[k] for k in sorted(rows)]
+
+
 def today_open(snap: dict) -> float:
     """스냅샷에서 오늘 시작가 (없으면 0)."""
-    try:
-        return float(snap["price"]["output"]["stck_oprc"])
-    except (KeyError, TypeError, ValueError):
-        return 0.0
+    o = (snap.get("price") or {}).get("output") or {}
+    for k in ("stck_oprc", "bstp_nmix_oprc"):  # 종목 / 지수
+        try:
+            v = float(o[k])
+            if v > 0:
+                return v
+        except (KeyError, TypeError, ValueError):
+            pass
+    return 0.0
