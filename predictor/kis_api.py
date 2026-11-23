@@ -55,18 +55,32 @@ def token() -> str:
 def get(path: str, tr_id: str, params: dict) -> dict:
     """예: get('/uapi/domestic-stock/v1/quotations/inquire-price', 'FHKST01010100', {...})"""
     global _last
-    wait = MIN_INTERVAL - (time.time() - _last)
-    if wait > 0:
-        time.sleep(wait)
-    r = requests.get(f"{BASE}{path}", params=params, timeout=30, headers={
-        "content-type": "application/json; charset=utf-8", "authorization": f"Bearer {token()}",
-        "appkey": _env("KIS_APP_KEY"), "appsecret": _env("KIS_APP_SECRET"), "tr_id": tr_id, "custtype": "P"})
-    _last = time.time()
-    try:
-        d = r.json()
-    except ValueError:
-        d = {"rt_cd": "?", "msg1": r.text[:200]}
-    d["_status"] = r.status_code
+    for attempt in range(4):  # 초당 호출 제한(EGW00201)이나 일시 오류면 잠깐 쉬었다가 다시
+        wait = MIN_INTERVAL - (time.time() - _last)
+        if wait > 0:
+            time.sleep(wait)
+        try:
+            r = requests.get(f"{BASE}{path}", params=params, timeout=30, headers={
+                "content-type": "application/json; charset=utf-8", "authorization": f"Bearer {token()}",
+                "appkey": _env("KIS_APP_KEY"), "appsecret": _env("KIS_APP_SECRET"), "tr_id": tr_id, "custtype": "P"})
+        except (requests.ConnectionError, requests.Timeout) as e:
+            _last = time.time()
+            if attempt == 3:
+                return {"rt_cd": "?", "msg1": str(e)[:200], "_status": 0}
+            time.sleep(1 + attempt)
+            continue
+        _last = time.time()
+        try:
+            d = r.json()
+        except ValueError:
+            d = {"rt_cd": "?", "msg1": r.text[:200]}
+        d["_status"] = r.status_code
+        if d.get("rt_cd") == "0" or attempt == 3:
+            return d
+        if d.get("msg_cd") == "EGW00201" or r.status_code >= 500:
+            time.sleep(1 + attempt)
+            continue
+        return d
     return d
 
 
@@ -94,6 +108,34 @@ def snapshot(code: str) -> dict:
         else:
             out[f"{name}_error"] = f"{d.get('_status')} {d.get('msg1', '')}"[:200]
     return out
+
+
+def minute_bars(code: str, market: str = "J", start: str = "0900", end: str = "1530") -> list[list]:
+    """오늘 1분봉. market: J=KRX, NX=NXT. 반환: [[끝시각 'HHMM', 시, 고, 저, 종, 거래량], ...] 시간순.
+    한 번에 30개씩 주므로 30분 간격으로 끝시각을 바꿔가며 받아요."""
+    def hm(m):
+        return f"{m // 60:02d}{m % 60:02d}"
+    s_min = int(start[:2]) * 60 + int(start[2:])
+    e_min = int(end[:2]) * 60 + int(end[2:])
+    rows = {}
+    t = e_min
+    while t > s_min:
+        d = get(f"{Q}/inquire-time-itemchartprice", "FHKST03010200", {
+            "FID_ETC_CLS_CODE": "", "FID_COND_MRKT_DIV_CODE": market, "FID_INPUT_ISCD": code,
+            "FID_INPUT_HOUR_1": hm(t) + "00", "FID_PW_DATA_INCU_YN": "N"})
+        if d.get("rt_cd") != "0":
+            break
+        for r in d.get("output2") or []:
+            h = r.get("stck_cntg_hour", "")[:4]
+            try:
+                hmv = int(h[:2]) * 60 + int(h[2:])
+                o, hi, lo, c = (float(r[k]) for k in ("stck_oprc", "stck_hgpr", "stck_lwpr", "stck_prpr"))
+            except (ValueError, KeyError):
+                continue
+            if s_min < hmv <= e_min and c > 0:
+                rows[h] = [h, o, hi, lo, c, float(r.get("cntg_vol") or 0)]
+        t -= 30
+    return [rows[k] for k in sorted(rows)]
 
 
 def today_open(snap: dict) -> float:

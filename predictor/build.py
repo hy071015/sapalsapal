@@ -627,6 +627,82 @@ def collect_kis(now):
     return out
 
 
+def collect_kis_minutes(now):
+    """한투 1분봉 저장 (비공개 저장소): KRX 정규장 09:00~15:30 + NXT 프리마켓 08:00~08:50.
+    장중엔 지금까지, 장 마감 뒤(16:15 실행)엔 하루 전체가 저장돼요. 야후 분봉(부정확, 15:00까지만)을 대신해요."""
+    if not is_trading_day(now.date()) or not (dt.time(8, 51) <= now.time() <= dt.time(19, 0)):
+        return
+    try:
+        import kis_api
+        kis_api.token()
+    except Exception:  # noqa: BLE001
+        return
+    folder = DATA_DIR / "kis" / now.strftime("%Y-%m-%d")
+    folder.mkdir(parents=True, exist_ok=True)
+    end = min(now.strftime("%H%M"), "1530")
+    n = 0
+    for a in ASSETS:
+        code = a["ticker"].split(".")[0]
+        try:
+            if end > "0900":
+                m = kis_api.minute_bars(code, "J", "0859", end)  # 09:00 봉(시작 동시호가) 포함
+                # 15:20~15:30은 종가 동시호가라 체결이 없고 직전 가격만 반복돼요 → 빼고, 장 마감 뒤엔 확정 종가를 마지막 봉으로
+                m = [r for r in m if not (r[0] > "1520" and r[5] == 0)]
+                if m and end == "1530":
+                    p = kis_api.get(f"{kis_api.Q}/inquire-price", "FHKST01010100",
+                                    {"FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": code}).get("output") or {}
+                    c = float(p.get("stck_prpr") or 0)
+                    if c > 0:
+                        m.append(["1530", c, c, c, c, 0.0])
+                if m:
+                    (folder / f"min_krx_{a['id']}.json").write_text(json.dumps(m), encoding="utf-8")
+                    n += 1
+            pre = folder / f"min_nxt_pre_{a['id']}.json"
+            if not pre.exists():
+                m = kis_api.minute_bars(code, "NX", "0800", "0850")
+                if m:
+                    pre.write_text(json.dumps(m), encoding="utf-8")
+        except Exception as e:  # noqa: BLE001
+            print(f"한투 분봉 실패 {a['id']}:", str(e)[:100])
+    print(f"한투 분봉 저장: {n}종목 (~{end[:2]}:{end[2:]})")
+
+
+def kis_minutes_frame(asset_id):
+    """비공개 저장소에 쌓인 한투 1분봉 → 한국시간 DataFrame (봉 시작 시각 기준)."""
+    parts = []
+    for f in sorted((DATA_DIR / "kis").glob(f"*/min_krx_{asset_id}.json")):
+        rows = json.loads(f.read_text(encoding="utf-8"))
+        if not rows:
+            continue
+        end = pd.to_datetime([f"{f.parent.name} {r[0][:2]}:{r[0][2:]}" for r in rows]).tz_localize(KST)
+        start = end - pd.Timedelta(minutes=1)
+        idx = start.where(end.time != dt.time(9, 0), end)  # 09:00 시작 동시호가 봉은 9시 봉에 포함
+        parts.append(pd.DataFrame([r[1:] for r in rows], index=idx, columns=["Open", "High", "Low", "Close", "Volume"]))
+    return pd.concat(parts).sort_index() if parts else pd.DataFrame()
+
+
+def resample_bars(m, rule):
+    g = m.resample(rule, label="left", closed="left")
+    out = pd.DataFrame({"Open": g.Open.first(), "High": g.High.max(), "Low": g.Low.min(), "Close": g.Close.last(), "Volume": g.Volume.sum()})
+    return out.dropna(subset=["Close"])
+
+
+def apply_kis_minutes(intra, bars5):
+    """한투 1분봉이 있는 날은 야후 1시간봉·5분봉을 한투 값으로 바꿔요 (오후 예측·사이트 분봉 팝업이 정확해지고 15:30까지 채워짐)."""
+    for a in ASSETS:
+        m = kis_minutes_frame(a["id"])
+        if not len(m):
+            continue
+        days = set(m.index.date)
+        for store, rule, cols in ((intra, "60min", ["Open", "High", "Low", "Close"]), (bars5, "5min", ["Open", "High", "Low", "Close", "Volume"])):
+            new = resample_bars(m, rule)[cols]
+            old = store.get(a["ticker"], pd.DataFrame())
+            if len(old):
+                old = old[~pd.Index(old.index.date).isin(days)]
+            store[a["ticker"]] = pd.concat([old, new]).sort_index() if len(old) else new
+        print(f"  [{a['id']}] 한투 분봉 적용: {len(days)}일")
+
+
 def run_asset(a, daily, intra, now, log, mode, bars5, vk=None, kis=None):
     kr = clean_korean(daily[a["ticker"]])
     df, f_morning, f_evening, next_day = build_frame(kr, a["drivers"], daily)
@@ -913,6 +989,8 @@ def main():
     print("5분봉 받는 중... (매일 누적 저장)")
     bars5 = fetch_5m([a["ticker"] for a in ASSETS])
     kis = collect_kis(now)
+    collect_kis_minutes(now)
+    apply_kis_minutes(intra, bars5)
     missing = [t for t in tickers if t not in daily]
     if missing:
         print("받지 못한 데이터:", missing)
