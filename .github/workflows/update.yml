@@ -49,7 +49,7 @@ jobs:
 
       # KRX 원본(VKOSPI)은 약관상 공개 저장소에 올리면 안 돼서, GitHub 내부 캐시(비공개)에만 보관해요.
       - name: KRX 자료 캐시 불러오기
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: data_private/krx_api
           key: krx-${{ github.run_id }}
@@ -61,6 +61,18 @@ jobs:
           KRX_API_KEY: ${{ secrets.KRX_API_KEY }}
           MODE: ${{ github.event.inputs.mode }}
         run: python predictor/build.py ${MODE:+--mode "$MODE"}
+
+      # 과거 자료가 충분히 있을 때만 캐시를 새로 저장 (덜 채워진 캐시가 꽉 찬 캐시를 대신하지 않게)
+      - name: KRX 자료 개수 확인
+        id: krx
+        run: echo "n=$(ls data_private/krx_api/idx_drvprod_dd_trd 2>/dev/null | wc -l)" >> "$GITHUB_OUTPUT"
+
+      - name: KRX 자료 캐시 저장
+        if: ${{ steps.krx.outputs.n >= 1500 }}
+        uses: actions/cache/save@v4
+        with:
+          path: data_private/krx_api
+          key: krx-${{ github.run_id }}
 
       - name: 결과 저장 (기록이 다음 실행에도 이어지도록)
         run: |
