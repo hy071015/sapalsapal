@@ -91,6 +91,14 @@ h1.logo .logo-text { color: var(--text); }
 
 /* 상세 */
 .detail { margin-top: 14px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
+.about-site { margin-top: 24px; color: var(--muted); font-size: 13px; line-height: 1.7; }
+.about-site h2 { font-size: 15px; color: var(--text); margin: 0 0 6px; }
+.about-site h3 { font-size: 13px; color: var(--text); margin: 0 0 4px; }
+.about-site p { margin: 0 0 10px; }
+.about-site ul { margin: 0 0 8px; padding-left: 18px; }
+.about-site b { color: var(--text); font-weight: 600; }
+.about-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 12px; }
+@media (max-width: 760px) { .about-grid { grid-template-columns: minmax(0, 1fr); gap: 10px; } }
 .dhead { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; align-items: center; }
 .dhead h2 { margin: 0; font-size: 20px; }
 .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: var(--soft); }
@@ -311,6 +319,41 @@ footer { margin-top: 24px; font-size: 12px; color: var(--muted); border-top: 1px
   <div class="cards" id="cards"></div>
   <div class="detail" id="detail"></div>
   <div class="detail" id="past"></div>
+
+  <!-- 검색 로봇도 읽을 수 있게 HTML에 직접 쓴 사이트 소개 (자바스크립트 없이 보이는 글) -->
+  <section class="about-site" aria-labelledby="aboutTitle">
+    <h2 id="aboutTitle">사팔사팔은 어떤 사이트인가요?</h2>
+    <p><b>사팔사팔</b>(sapalsapal.com)은 짧게 사고파는 단타 투자자를 위해, 매일 장 초반에
+    <b>코스피200, 삼성전자, SK하이닉스, 삼성전기, 현대차</b>의 <b>오늘 고가(상방)와 저가(하방)</b>를 예측해 보여주는 참고 사이트예요.
+    "오늘 주가의 머리와 발바닥이 어디쯤일까?"를 숫자로 알려드려요.</p>
+    <div class="about-grid">
+      <div>
+        <h3>언제 업데이트되나요?</h3>
+        <ul>
+          <li><b>9:30 오전 예측</b>: 오늘 시작가와 9:00~9:30 장 초반 움직임으로 상방·하방과 최대 범위를 계산해요.</li>
+          <li><b>12:30 오후 예측</b>: 오전장 고가를 돌파할 확률, 저가를 이탈할 확률을 알려드려요.</li>
+          <li><b>장 마감 후</b>: 오늘 실제 고가·저가·종가를 기록하고 예측과 비교해요.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>어떻게 계산하나요?</h3>
+        <ul>
+          <li>밤사이 미국 시장(나스닥·S&amp;P500 선물, 반도체지수, 한국 ETF), 미국 공포지수(VIX), 원/달러 환율</li>
+          <li>코스피 공포지수(VKOSPI, 한국거래소 통계정보)와 최근 변동폭</li>
+          <li>오늘 시작가 갭과 장 초반 30분의 실제 움직임</li>
+        </ul>
+        <p>과거 약 6년 데이터로 학습한 통계 모델이며, 과거 날짜마다 그날 이전 정보만으로 다시 예측해 성적을 공개해요.</p>
+      </div>
+      <div>
+        <h3>그 밖에 볼 수 있는 것</h3>
+        <ul>
+          <li><b>만기 예측</b>: 코스피200 위클리·월물 옵션 만기일 종가가 80% 확률로 들어올 범위</li>
+          <li><b>참고지표</b>: 코스피 공포탐욕지수, VKOSPI, 미국채 10년물 금리, 유가, FOMC·CPI·금통위 등 이벤트 달력</li>
+          <li><b>선물·옵션 기초</b>: 선물, 옵션, 위클리 옵션, 만기일을 쉽게 설명</li>
+        </ul>
+      </div>
+    </div>
+  </section>
 
   <footer>
     <nav class="foot-links">
