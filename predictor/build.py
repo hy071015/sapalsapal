@@ -593,7 +593,7 @@ def early_features(asset_id):
     for f in files:
         m = [r for r in json.loads(f.read_text(encoding="utf-8")) if r[0] <= "0930"]
         need = 20 if "min_krx" in f.name else 6
-        if len(m) < need or m[0][0] > "0901":
+        if len(m) < need or m[0][0] > "0910":  # VI로 시작 체결이 늦어지는 날 포함
             continue
         o, c = m[0][1], m[-1][4]
         rows[pd.Timestamp(f.parent.name)] = dict(e_ret=c / o - 1, e_hi=max(r[2] for r in m) / o - 1,
@@ -657,31 +657,48 @@ def load_index_daily(a):
 
 
 def patch_stock_daily(a, daily):
-    """야후 종목 일봉의 최근 100일을 한투 값으로 덮어써요.
-    (야후는 당일 시작가를 장 마감 후에도 0으로 줘서 오늘 결과가 빠졌음, 2026-11-23)"""
+    """종목 일봉을 KRX 정규장(09:00~15:30) 값으로 맞춰요. 우선순위:
+    ① 한투 정규장 1분봉으로 만든 일봉 (가장 정확, 15:30 봉 = 종가 동시호가 확정 종가)
+    ② 야후 일봉 (값이 정상인 날)  ③ 한투 일봉 (둘 다 없을 때만)
+    한투 일봉은 시간외 거래가 섞이는 날이 있어서(2026-11-24 삼성 종가 189,400 → 182,900) 마지막 수단으로만 써요.
+    야후는 당일 시작가를 0으로 주거나 종가가 빠지는 날이 있어요."""
+    if a["ticker"] not in daily:
+        return
+    code = a["ticker"].split(".")[0]
+
+    def from_minutes(m):
+        if not m or m[0][0] > "0910" or m[-1][0] != "1530":  # 변동성 완화장치(VI)로 첫 체결이 09:02쯤 될 수 있음
+            return None
+        return dict(Open=m[0][1], High=max(r[2] for r in m), Low=min(r[3] for r in m), Close=m[-1][4], Volume=sum(r[5] for r in m))
+
+    reg = {}
+    for f in (DATA_DIR / "kis").glob(f"*/min_krx_{a['id']}.json"):
+        r = from_minutes(json.loads(f.read_text(encoding="utf-8")))
+        if r:
+            reg[pd.Timestamp(f.parent.name)] = r
+    now = now_kst()
+    today = pd.Timestamp(now.date())
+    kis_daily = []
     try:
         import kis_api
-        rows = kis_api.stock_daily_recent(a["ticker"].split(".")[0])
+        if is_trading_day(now.date()) and now.time() >= dt.time(15, 31) and today not in reg:
+            r = from_minutes(kis_api.minute_bars_day(code, now.strftime("%Y%m%d")))
+            if r:
+                reg[today] = r
+        kis_daily = kis_api.stock_daily_recent(code)
     except Exception as e:  # noqa: BLE001
         print(f"한투 일봉 실패 {a['id']}:", str(e)[:80])
-        return
-    if not rows or a["ticker"] not in daily:
-        return
-    now = now_kst()
-    today = now.strftime("%Y%m%d")
-    rows = [r for r in rows if r["date"] != today]  # 오늘 일봉은 16시 이후 시간외 거래로 종가가 바뀌어서 안 씀
-    if is_trading_day(now.date()) and now.time() >= dt.time(15, 31):
-        # 오늘: 한투 과거분봉 API의 1분봉으로 만들어요 (15:30 봉 = 종가 동시호가 확정 종가)
-        m = kis_api.minute_bars_day(a["ticker"].split(".")[0], today)
-        if m and m[-1][0] == "1530":
-            rows.append(dict(date=today, open=m[0][1], high=max(r[2] for r in m), low=min(r[3] for r in m),
-                             close=m[-1][4], volume=sum(r[5] for r in m)))
-    k = pd.DataFrame(rows)
-    k.index = pd.to_datetime(k.pop("date"))
-    k = k.rename(columns=str.title)[["Open", "High", "Low", "Close", "Volume"]]
-    y = daily[a["ticker"]]
-    y = y[~y.index.isin(k.index)]
-    daily[a["ticker"]] = pd.concat([y, k.reindex(columns=y.columns)]).sort_index()
+
+    y = daily[a["ticker"]].copy()
+    ok = (y[["Open", "High", "Low", "Close"]] > 0).all(axis=1) & y.Close.notna()
+    y = y[ok]
+    for r in kis_daily:  # ③ 야후에도 1분봉에도 없는 지난 날짜만
+        d = pd.Timestamp(r["date"])
+        if d < today and d not in y.index and d not in reg:
+            y.loc[d, ["Open", "High", "Low", "Close", "Volume"]] = [r["open"], r["high"], r["low"], r["close"], r["volume"]]
+    for d, r in reg.items():  # ① 정규장 1분봉이 최우선
+        y.loc[d, list(r)] = list(r.values())
+    daily[a["ticker"]] = y.sort_index()
 
 
 def collect_kis(now):
