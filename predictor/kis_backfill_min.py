@@ -10,7 +10,8 @@ from pathlib import Path
 
 import kis_api
 
-STOCKS = {"samsung": "005930", "hynix": "000660", "semco": "009150", "hyundai": "005380"}
+STOCKS = {"samsung": "005930", "hynix": "000660", "semco": "009150", "hyundai": "005380",
+          "kodex200": "069500"}  # kodex200: 코스피200 지수의 장 초반 30분 지표 계산용 (지수는 과거 분봉이 없음)
 
 
 def main():

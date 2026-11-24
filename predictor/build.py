@@ -38,7 +38,8 @@ LOG = ROOT / "site" / "log.json"
 # 예측할 종목과, 각 종목에 영향을 주는 해외 지표(첫 번째가 가장 중요한 지표)
 ASSETS = [
     # 코스피200: 실제 지수 (일봉은 한투, 과거 분봉은 야후 ^KS200, 오늘 분봉은 한투). 2026-11-23 KODEX200 ETF 환산에서 변경
-    dict(id="kospi200", name="코스피200", ticker="^KS200", kis_index="2001",
+    # early_proxy: 지수는 과거 분봉이 없어서 장 초반 30분 지표는 KODEX 200 ETF 1분봉(069500)으로 계산
+    dict(id="kospi200", name="코스피200", ticker="^KS200", kis_index="2001", early_proxy=("kodex200", "069500"),
          unit="pt", decimals=2, drivers=["NQ=F", "ES=F", "EWY"], vkospi=True),
     dict(id="samsung", name="삼성전자", ticker="005930.KS", unit="원", decimals=0,
          drivers=["EWY", "^SOX", "NQ=F", "MU", "NVDA"]),
@@ -584,9 +585,11 @@ EARLY_START = 100                         # 성적 계산 때 최소 학습일
 
 
 def early_features(asset_id):
-    """비공개 저장소의 한투 1분봉(종목)·5분봉(지수)에서 날짜별 9:00~9:30 지표."""
+    """비공개 저장소의 한투 1분봉에서 날짜별 9:00~9:30 지표 (지수는 ETF 1분봉으로 대신)."""
     rows = {}
-    files = list((DATA_DIR / "kis").glob(f"*/min_krx_{asset_id}.json")) + list((DATA_DIR / "kis").glob(f"*/min5_idx_{asset_id}.json"))
+    a = next((x for x in ASSETS if x["id"] == asset_id), {})
+    src = a["early_proxy"][0] if a.get("early_proxy") else asset_id
+    files = list((DATA_DIR / "kis").glob(f"*/min_krx_{src}.json"))
     for f in files:
         m = [r for r in json.loads(f.read_text(encoding="utf-8")) if r[0] <= "0930"]
         need = 20 if "min_krx" in f.name else 6
@@ -727,6 +730,13 @@ def collect_kis_minutes(now):
                 if m:
                     (folder / f"min5_idx_{a['id']}.json").write_text(json.dumps(m), encoding="utf-8")
                     n += 1
+                if a.get("early_proxy") and end > "0900":  # 장 초반 30분 지표용 ETF 1분봉
+                    pid, pcode = a["early_proxy"]
+                    m = (kis_api.minute_bars_day(pcode, now.strftime("%Y%m%d")) if end == "1530"
+                         else kis_api.minute_bars(pcode, "J", "0859", end))
+                    m = [r for r in m if not (r[0] > "1520" and r[0] != "1530" and r[5] == 0)]
+                    if m:
+                        (folder / f"min_krx_{pid}.json").write_text(json.dumps(m), encoding="utf-8")
                 continue
             if end > "0900":
                 if end == "1530":  # 장 마감 뒤: 과거분봉 API (15:30 봉에 종가 동시호가 체결 포함, 시간외 거래 영향 없음)
@@ -855,6 +865,13 @@ def run_asset(a, daily, intra, now, log, mode, bars5, vk=None, kis=None):
     use_early = len(valid_eo) >= EARLY_MIN_DAYS
     if use_early:
         hist_wf, open_stats = open_eval(valid_eo, f_open + EARLY_FEATS, wf_m[["p_hi", "p_lo"]], min_train=EARLY_START)
+        if a.get("early_proxy"):
+            # 코스피200: 새 모델의 최대 범위가 너무 좁아(적중 67%) 기존 모델 범위와 합쳐요 (합치면 82%, 2026-11-24 검증)
+            old_wf, _ = open_eval(valid_eo, f_open, wf_m[["p_hi", "p_lo"]], min_train=EARLY_START)
+            hist_wf["p_hi_band"] = np.maximum(hist_wf.p_hi_band, old_wf.p_hi_band.reindex(hist_wf.index))
+            hist_wf["p_lo_band"] = np.minimum(hist_wf.p_lo_band, old_wf.p_lo_band.reindex(hist_wf.index))
+            inb = (hist_wf.hi <= hist_wf.p_hi_band + 1e-9) & (hist_wf.lo >= hist_wf.p_lo_band - 1e-9)
+            open_stats["band_cover"] = round(float(inb.mean()) * 100, 1)
     else:
         hist_wf, open_stats = open_eval(valid_o, f_open, wf_m[["p_hi", "p_lo"]])
     open_stats["vkospi"] = bool(use_vk)
@@ -891,7 +908,10 @@ def run_asset(a, daily, intra, now, log, mode, bars5, vk=None, kis=None):
         row["gap"] = o / prev_close - 1
         if use_early and today in early.index:  # 9:00~9:30 1분봉까지 반영
             row = row.join(early[EARLY_FEATS])
-            po = open_predict(valid_eo, row, f_open + EARLY_FEATS).iloc[0]
+            po = open_predict(valid_eo, row, f_open + EARLY_FEATS).iloc[0].copy()
+            if a.get("early_proxy"):  # 최대 범위는 기존 모델과 합침
+                old = open_predict(valid_o, row, f_open).iloc[0]
+                po["p_hi_band"], po["p_lo_band"] = max(po.p_hi_band, old.p_hi_band), min(po.p_lo_band, old.p_lo_band)
             print(f"  [{a['id']}] 9:30 예측: 장 초반 30분 반영")
         else:
             po = open_predict(valid_o, row, f_open).iloc[0]
