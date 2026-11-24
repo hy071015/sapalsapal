@@ -17,7 +17,9 @@ STOCKS = {"samsung": "005930", "hynix": "000660", "semco": "009150", "hyundai": 
 def main():
     root = Path(sys.argv[1])
     n_days = int(sys.argv[2]) if len(sys.argv) > 2 else 250
-    days = [r["date"] for r in kis_api.index_daily("2001", start="20240101")][-n_days - 1:-1]  # 오늘 제외 최근 거래일
+    import datetime as dt
+    days = [r["date"] for r in kis_api.index_daily("2001", start="20240101")]
+    days = [d for d in days if d != dt.date.today().strftime("%Y%m%d")][-n_days:]  # 오늘(장중일 수 있음)만 제외
     done = 0
     for i, day in enumerate(reversed(days)):
         folder = root / "kis" / f"{day[:4]}-{day[4:6]}-{day[6:]}"
