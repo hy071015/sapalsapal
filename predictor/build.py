@@ -393,13 +393,19 @@ def open_predict(train, test, feats):
         d = predict(quantile_fit(X, dn, q), Xt).clip(min=0)
         out[f"p_hi{name}"] = (1 + g) * (1 + u) - 1   # 전일 종가 대비
         out[f"p_lo{name}"] = (1 + g) * (1 - d) - 1
+    if "e_hi" in test.columns:  # 9:30에 이미 아는 사실: 고가는 9:30까지의 고가보다 낮을 수 없음 (저가도 마찬가지)
+        k_hi = ((1 + test.gap) * (1 + test.e_hi) - 1).values
+        k_lo = ((1 + test.gap) * (1 - test.e_lo) - 1).values
+        for s in ("", "_band"):
+            out[f"p_hi{s}"] = np.fmax(out[f"p_hi{s}"].values, k_hi)
+            out[f"p_lo{s}"] = np.fmin(out[f"p_lo{s}"].values, k_lo)
     out["p_hi_band"] = np.maximum(out.p_hi_band, out.p_hi)
     out["p_lo_band"] = np.minimum(out.p_lo_band, out.p_lo)
     return out
 
 
-def open_eval(valid, feats, wf_morning):
-    start = max(MIN_TRAIN, len(valid) - STAT_DAYS)
+def open_eval(valid, feats, wf_morning, min_train=MIN_TRAIN):
+    start = max(min_train, len(valid) - STAT_DAYS)
     wf = pd.concat([open_predict(valid.iloc[:i], valid.iloc[i:i + BLOCK], feats) for i in range(start, len(valid), BLOCK)])
     wf = wf.join(valid[["hi", "lo", "gap", "High", "Low", "Open", "Close", "prev_close"]])
     up = (valid.High / valid.Open - 1).rolling(20).median().shift(1).reindex(wf.index)
@@ -571,6 +577,27 @@ def expiry_ranges(kr: pd.DataFrame, lv, vk_vol: pd.Series | None = None) -> list
 
 
 # ───────────────────────────── 종목별 실행 ─────────────────────────────
+# 장 초반 30분(9:00~9:30) 한투 1분봉 지표. 2026-11-24 검증(약 90거래일): 고가 오차 26~52%, 저가 13~31% 개선
+EARLY_FEATS = ["e_ret", "e_hi", "e_lo"]   # 시작가→9:30 움직임, 9:30까지 고가·저가 (거래량·매수세는 효과가 약해서 뺌)
+EARLY_MIN_DAYS = 120                      # 1분봉이 이만큼 쌓인 종목만 사용
+EARLY_START = 100                         # 성적 계산 때 최소 학습일
+
+
+def early_features(asset_id):
+    """비공개 저장소의 한투 1분봉(종목)·5분봉(지수)에서 날짜별 9:00~9:30 지표."""
+    rows = {}
+    files = list((DATA_DIR / "kis").glob(f"*/min_krx_{asset_id}.json")) + list((DATA_DIR / "kis").glob(f"*/min5_idx_{asset_id}.json"))
+    for f in files:
+        m = [r for r in json.loads(f.read_text(encoding="utf-8")) if r[0] <= "0930"]
+        need = 20 if "min_krx" in f.name else 6
+        if len(m) < need or m[0][0] > "0901":
+            continue
+        o, c = m[0][1], m[-1][4]
+        rows[pd.Timestamp(f.parent.name)] = dict(e_ret=c / o - 1, e_hi=max(r[2] for r in m) / o - 1,
+                                                 e_lo=1 - min(r[3] for r in m) / o)
+    return pd.DataFrame(rows).T.sort_index() if rows else pd.DataFrame(columns=EARLY_FEATS)
+
+
 VK_FEATS = ["vk", "vk_chg", "vk_rel"]
 VK_MIN_DAYS = 600  # VKOSPI 과거 자료가 이만큼 없으면 VKOSPI 없이 계산
 
@@ -823,8 +850,15 @@ def run_asset(a, daily, intra, now, log, mode, bars5, vk=None, kis=None):
     if use_vk and df[VK_FEATS].iloc[-1].isna().any():  # 오늘 쓸 전날 VKOSPI가 없으면 원래 모델로
         f_open, valid_o = f_morning + ["gap"], valid_m.dropna(subset=["Open"])
         use_vk = False
-    hist_wf, open_stats = open_eval(valid_o, f_open, wf_m[["p_hi", "p_lo"]])
+    early = early_features(a["id"])
+    valid_eo = valid_o.join(early[EARLY_FEATS]).dropna(subset=EARLY_FEATS)
+    use_early = len(valid_eo) >= EARLY_MIN_DAYS
+    if use_early:
+        hist_wf, open_stats = open_eval(valid_eo, f_open + EARLY_FEATS, wf_m[["p_hi", "p_lo"]], min_train=EARLY_START)
+    else:
+        hist_wf, open_stats = open_eval(valid_o, f_open, wf_m[["p_hi", "p_lo"]])
     open_stats["vkospi"] = bool(use_vk)
+    open_stats["early"] = bool(use_early)
     # 차트용: 실제 캔들(시작가·고가·저가·종가)과 9:30 예상 상방·하방을 가격(코스피200은 포인트)으로
     history = [dict(date=d.strftime("%m/%d"), day=d.strftime("%Y-%m-%d"), o=lv(r.Open), h=lv(r.High), l=lv(r.Low), c=lv(r.Close),
                     pc=lv(r.prev_close), ph=lv(r.prev_close * (1 + r.p_hi)), pl=lv(r.prev_close * (1 + r.p_lo)),
@@ -855,7 +889,12 @@ def run_asset(a, daily, intra, now, log, mode, bars5, vk=None, kis=None):
             and ((in_open_window and not open_done) or mode == "open")):
         row = df.iloc[[-1]].copy()
         row["gap"] = o / prev_close - 1
-        po = open_predict(valid_o, row, f_open).iloc[0]
+        if use_early and today in early.index:  # 9:00~9:30 1분봉까지 반영
+            row = row.join(early[EARLY_FEATS])
+            po = open_predict(valid_eo, row, f_open + EARLY_FEATS).iloc[0]
+            print(f"  [{a['id']}] 9:30 예측: 장 초반 30분 반영")
+        else:
+            po = open_predict(valid_o, row, f_open).iloc[0]
         log.setdefault(today_key, {}).setdefault(a["id"], {})["open"] = dict(
             at=stamp, prev_close=lv(prev_close), open=lv(o), high=level(po.p_hi), low=level(po.p_lo),
             band_high=level(po.p_hi_band), band_low=level(po.p_lo_band), drivers=drivers)
