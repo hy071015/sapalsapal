@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-24 11:12",
+ "generated_at": "2026-11-24 11:33",
  "assets": [
   {
    "id": "kospi200",
@@ -9,22 +9,43 @@
    "note": null,
    "target_date": "2026-11-24",
    "prev_date": "2026-11-23",
-   "us_date": "2026-11-20",
-   "ready": false,
-   "kind": "evening",
+   "us_date": "2026-11-23",
+   "ready": true,
+   "kind": "morning",
    "prev_close": 730.83,
    "pred": {
-    "open": 733.79,
-    "high": 748.09,
-    "low": 717.94
+    "open": 763.87,
+    "high": 783.24,
+    "low": 751.14
    },
    "pred_pct": {
-    "open": 0.405,
-    "high": 2.361,
-    "low": -1.763,
-    "close": 0.36
+    "open": 4.521,
+    "high": 7.171,
+    "low": 2.779,
+    "close": 5.583
    },
-   "drivers": [],
+   "drivers": [
+    {
+     "name": "나스닥 선물",
+     "ret": 6.633
+    },
+    {
+     "name": "S&P500 선물",
+     "ret": 4.694
+    },
+    {
+     "name": "한국 ETF(EWY)",
+     "ret": 10.109
+    },
+    {
+     "name": "공포지수(VIX)",
+     "ret": -25.829
+    },
+    {
+     "name": "원/달러 환율",
+     "ret": 0.713
+    }
+   ],
    "stats": {
     "days": 250,
     "start": "2025-11-14",
@@ -898,19 +919,19 @@
    "mid_stats": {
     "days": 250,
     "up_rate": 32.0,
-    "dn_rate": 34.4,
-    "up_acc": 80.0,
-    "dn_acc": 76.8,
-    "up_gain": 36.5,
-    "dn_gain": 28.7,
-    "band_cover": 72.8,
-    "mae_close": 1.112,
-    "base_mae_close": 1.078,
+    "dn_rate": 35.2,
+    "up_acc": 79.2,
+    "dn_acc": 76.4,
+    "up_gain": 36.7,
+    "dn_gain": 29.8,
+    "band_cover": 73.2,
+    "mae_close": 1.148,
+    "base_mae_close": 1.108,
     "without_morning": {
-     "up_acc": 80.0,
+     "up_acc": 79.6,
      "dn_acc": 77.2,
-     "up_gain": 37.1,
-     "dn_gain": 29.4,
+     "up_gain": 37.5,
+     "dn_gain": 30.1,
      "band_cover": 72.8
     }
    },
@@ -993,22 +1014,51 @@
    "note": null,
    "target_date": "2026-11-24",
    "prev_date": "2026-11-23",
-   "us_date": "2026-11-20",
-   "ready": false,
-   "kind": "evening",
+   "us_date": "2026-11-23",
+   "ready": true,
+   "kind": "morning",
    "prev_close": 177500,
    "pred": {
-    "open": 178500,
-    "high": 182600,
-    "low": 174700
+    "open": 189600,
+    "high": 193900,
+    "low": 183600
    },
    "pred_pct": {
-    "open": 0.54,
-    "high": 2.874,
-    "low": -1.593,
-    "close": 0.541
+    "open": 6.845,
+    "high": 9.214,
+    "low": 3.462,
+    "close": 6.354
    },
-   "drivers": [],
+   "drivers": [
+    {
+     "name": "한국 ETF(EWY)",
+     "ret": 10.109
+    },
+    {
+     "name": "반도체지수",
+     "ret": 14.027
+    },
+    {
+     "name": "나스닥 선물",
+     "ret": 6.633
+    },
+    {
+     "name": "마이크론",
+     "ret": 19.039
+    },
+    {
+     "name": "엔비디아",
+     "ret": 31.483
+    },
+    {
+     "name": "공포지수(VIX)",
+     "ret": -25.829
+    },
+    {
+     "name": "원/달러 환율",
+     "ret": 0.713
+    }
+   ],
    "stats": {
     "days": 250,
     "start": "2025-11-14",
@@ -1985,22 +2035,51 @@
    "note": null,
    "target_date": "2026-11-24",
    "prev_date": "2026-11-23",
-   "us_date": "2026-11-20",
-   "ready": false,
-   "kind": "evening",
+   "us_date": "2026-11-23",
+   "ready": true,
+   "kind": "morning",
    "prev_close": 1085000,
    "pred": {
-    "open": 1092000,
-    "high": 1121000,
-    "low": 1059000
+    "open": 1214000,
+    "high": 1238000,
+    "low": 1155000
    },
    "pred_pct": {
-    "open": 0.675,
-    "high": 3.298,
-    "low": -2.383,
-    "close": 0.244
+    "open": 11.847,
+    "high": 14.096,
+    "low": 6.471,
+    "close": 9.603
    },
-   "drivers": [],
+   "drivers": [
+    {
+     "name": "반도체지수",
+     "ret": 14.027
+    },
+    {
+     "name": "마이크론",
+     "ret": 19.039
+    },
+    {
+     "name": "엔비디아",
+     "ret": 31.483
+    },
+    {
+     "name": "나스닥 선물",
+     "ret": 6.633
+    },
+    {
+     "name": "한국 ETF(EWY)",
+     "ret": 10.109
+    },
+    {
+     "name": "공포지수(VIX)",
+     "ret": -25.829
+    },
+    {
+     "name": "원/달러 환율",
+     "ret": 0.713
+    }
+   ],
    "stats": {
     "days": 250,
     "start": "2025-11-14",
@@ -2977,22 +3056,47 @@
    "note": null,
    "target_date": "2026-11-24",
    "prev_date": "2026-11-23",
-   "us_date": "2026-11-20",
-   "ready": false,
-   "kind": "evening",
+   "us_date": "2026-11-23",
+   "ready": true,
+   "kind": "morning",
    "prev_close": 778000,
    "pred": {
-    "open": 784000,
-    "high": 812000,
-    "low": 752000
+    "open": 830000,
+    "high": 851000,
+    "low": 794000
    },
    "pred_pct": {
-    "open": 0.776,
-    "high": 4.4,
-    "low": -3.349,
-    "close": 0.312
+    "open": 6.743,
+    "high": 9.336,
+    "low": 2.066,
+    "close": 5.335
    },
-   "drivers": [],
+   "drivers": [
+    {
+     "name": "반도체지수",
+     "ret": 14.027
+    },
+    {
+     "name": "한국 ETF(EWY)",
+     "ret": 10.109
+    },
+    {
+     "name": "애플",
+     "ret": 1.903
+    },
+    {
+     "name": "나스닥 선물",
+     "ret": 6.633
+    },
+    {
+     "name": "공포지수(VIX)",
+     "ret": -25.829
+    },
+    {
+     "name": "원/달러 환율",
+     "ret": 0.713
+    }
+   ],
    "stats": {
     "days": 250,
     "start": "2025-11-13",
@@ -3965,22 +4069,47 @@
    "note": null,
    "target_date": "2026-11-24",
    "prev_date": "2026-11-23",
-   "us_date": "2026-11-20",
-   "ready": false,
-   "kind": "evening",
+   "us_date": "2026-11-23",
+   "ready": true,
+   "kind": "morning",
    "prev_close": 247500,
    "pred": {
-    "open": 248000,
-    "high": 252000,
-    "low": 242500
+    "open": 258500,
+    "high": 262500,
+    "low": 250500
    },
    "pred_pct": {
-    "open": 0.161,
-    "high": 1.859,
-    "low": -2.045,
-    "close": -0.408
+    "open": 4.357,
+    "high": 6.121,
+    "low": 1.123,
+    "close": 2.813
    },
-   "drivers": [],
+   "drivers": [
+    {
+     "name": "한국 ETF(EWY)",
+     "ret": 10.109
+    },
+    {
+     "name": "S&P500 선물",
+     "ret": 4.694
+    },
+    {
+     "name": "나스닥 선물",
+     "ret": 6.633
+    },
+    {
+     "name": "도요타",
+     "ret": 2.256
+    },
+    {
+     "name": "공포지수(VIX)",
+     "ret": -25.829
+    },
+    {
+     "name": "원/달러 환율",
+     "ret": 0.713
+    }
+   ],
    "stats": {
     "days": 250,
     "start": "2025-11-14",
@@ -5442,11 +5571,11 @@
    {
     "name": "WTI 유가",
     "unit": "달러",
-    "value": 80.01,
+    "value": 79.91,
     "date": "2026-11-23",
-    "chg": -3.97,
-    "chg_pct": -4.727,
-    "chg_20": -21.374,
+    "chg": -4.07,
+    "chg_pct": -4.846,
+    "chg_20": -21.472,
     "history": [
      [
       "06/04",
@@ -5926,18 +6055,18 @@
      ],
      [
       "11/23",
-      80.01
+      79.91
      ]
     ]
    },
    {
     "name": "브렌트 유가",
     "unit": "달러",
-    "value": 86.58,
+    "value": 86.36,
     "date": "2026-11-23",
-    "chg": -5.99,
-    "chg_pct": -6.471,
-    "chg_20": -25.24,
+    "chg": -6.21,
+    "chg_pct": -6.708,
+    "chg_20": -25.43,
     "history": [
      [
       "06/04",
@@ -6417,7 +6546,7 @@
      ],
      [
       "11/23",
-      86.58
+      86.36
      ]
     ]
    }
@@ -6430,44 +6559,40 @@
    "date": "2026-11-23"
   },
   "fear_greed": {
-   "score": 17.8,
+   "score": 18.5,
    "label": "극단적 공포",
    "date": "2026-11-24",
-   "prev": 18.7,
-   "week": 24.7,
-   "month": 39.3,
+   "prev": 16.4,
+   "week": 21.7,
+   "month": 39.5,
    "components": [
     {
      "name": "주가 추세",
-     "score": 1.6,
+     "score": 2.8,
      "desc": "코스피가 125일 평균보다 얼마나 위에 있는지"
     },
     {
      "name": "변동성",
-     "score": 38.2,
+     "score": 35.7,
      "desc": "최근 20일 변동성 (클수록 공포)"
     },
     {
      "name": "주가 위치",
-     "score": 22.3,
+     "score": 22.2,
      "desc": "1년 최저가~최고가 사이 위치"
     },
     {
      "name": "원화 흐름",
-     "score": 22.5,
+     "score": 26.9,
      "desc": "최근 20일 원/달러 (원화 약세일수록 공포)"
     },
     {
      "name": "글로벌 위험선호",
-     "score": 4.4,
+     "score": 4.8,
      "desc": "미국 VIX 수준 (높을수록 공포)"
     }
    ],
    "history": [
-    [
-     "05/29",
-     66.4
-    ],
     [
      "06/01",
      61.3
@@ -6941,15 +7066,15 @@
      18.7
     ],
     [
+     "11/23",
+     16.4
+    ],
+    [
      "11/24",
-     17.8
+     18.5
     ]
    ],
    "kospi": [
-    [
-     "05/29",
-     8476.15
-    ],
     [
      "06/01",
      8788.38
@@ -7423,8 +7548,12 @@
      4869.96
     ],
     [
+     "11/23",
+     4708.54
+    ],
+    [
      "11/24",
-     5020.51
+     5013.28
     ]
    ]
   },
