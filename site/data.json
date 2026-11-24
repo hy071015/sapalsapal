@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-24 08:35",
+ "generated_at": "2026-11-24 09:07",
  "assets": [
   {
    "id": "kospi200",
@@ -14,24 +14,24 @@
    "kind": "morning",
    "prev_close": 730.83,
    "pred": {
-    "open": 764.01,
-    "high": 783.52,
-    "low": 751.43
+    "open": 763.7,
+    "high": 783.2,
+    "low": 751.09
    },
    "pred_pct": {
-    "open": 4.541,
-    "high": 7.209,
-    "low": 2.819,
-    "close": 5.637
+    "open": 4.497,
+    "high": 7.166,
+    "low": 2.772,
+    "close": 5.589
    },
    "drivers": [
     {
      "name": "나스닥 선물",
-     "ret": 6.601
+     "ret": 6.467
     },
     {
      "name": "S&P500 선물",
-     "ret": 4.647
+     "ret": 4.571
     },
     {
      "name": "한국 ETF(EWY)",
@@ -43,7 +43,7 @@
     },
     {
      "name": "원/달러 환율",
-     "ret": 0.487
+     "ret": 0.713
     }
    ],
    "stats": {
@@ -888,19 +888,19 @@
    "mid_stats": {
     "days": 250,
     "up_rate": 32.0,
-    "dn_rate": 35.2,
-    "up_acc": 79.6,
-    "dn_acc": 76.4,
-    "up_gain": 36.7,
-    "dn_gain": 29.8,
-    "band_cover": 72.4,
-    "mae_close": 1.147,
-    "base_mae_close": 1.108,
+    "dn_rate": 34.4,
+    "up_acc": 80.0,
+    "dn_acc": 76.8,
+    "up_gain": 36.5,
+    "dn_gain": 28.7,
+    "band_cover": 72.8,
+    "mae_close": 1.112,
+    "base_mae_close": 1.078,
     "without_morning": {
-     "up_acc": 79.6,
+     "up_acc": 80.0,
      "dn_acc": 77.2,
-     "up_gain": 37.4,
-     "dn_gain": 30.1,
+     "up_gain": 37.1,
+     "dn_gain": 29.4,
      "band_cover": 72.8
     }
    },
@@ -993,10 +993,10 @@
     "low": 183700
    },
    "pred_pct": {
-    "open": 6.866,
-    "high": 9.227,
-    "low": 3.488,
-    "close": 6.375
+    "open": 6.864,
+    "high": 9.253,
+    "low": 3.493,
+    "close": 6.407
    },
    "drivers": [
     {
@@ -1009,7 +1009,7 @@
     },
     {
      "name": "나스닥 선물",
-     "ret": 6.601
+     "ret": 6.467
     },
     {
      "name": "마이크론",
@@ -1025,7 +1025,7 @@
     },
     {
      "name": "원/달러 환율",
-     "ret": 0.487
+     "ret": 0.713
     }
    ],
    "stats": {
@@ -1873,17 +1873,17 @@
     "dn_rate": 35.6,
     "up_acc": 78.0,
     "dn_acc": 76.4,
-    "up_gain": 22.8,
+    "up_gain": 23.0,
     "dn_gain": 27.0,
     "band_cover": 75.2,
-    "mae_close": 1.393,
+    "mae_close": 1.392,
     "base_mae_close": 1.376,
     "without_morning": {
      "up_acc": 77.2,
      "dn_acc": 74.4,
-     "up_gain": 23.3,
+     "up_gain": 23.4,
      "dn_gain": 26.2,
-     "band_cover": 74.4
+     "band_cover": 74.8
     }
    },
    "open_stats": {
@@ -1975,10 +1975,10 @@
     "low": 1156000
    },
    "pred_pct": {
-    "open": 11.881,
-    "high": 14.125,
-    "low": 6.519,
-    "close": 9.651
+    "open": 11.878,
+    "high": 14.146,
+    "low": 6.523,
+    "close": 9.669
    },
    "drivers": [
     {
@@ -1995,7 +1995,7 @@
     },
     {
      "name": "나스닥 선물",
-     "ret": 6.601
+     "ret": 6.467
     },
     {
      "name": "한국 ETF(EWY)",
@@ -2007,7 +2007,7 @@
     },
     {
      "name": "원/달러 환율",
-     "ret": 0.487
+     "ret": 0.713
     }
    ],
    "stats": {
@@ -2853,18 +2853,18 @@
     "days": 250,
     "up_rate": 28.4,
     "dn_rate": 34.0,
-    "up_acc": 76.8,
+    "up_acc": 76.4,
     "dn_acc": 72.4,
     "up_gain": 23.3,
-    "dn_gain": 23.3,
+    "dn_gain": 23.4,
     "band_cover": 74.4,
-    "mae_close": 1.869,
+    "mae_close": 1.868,
     "base_mae_close": 1.844,
     "without_morning": {
-     "up_acc": 74.8,
+     "up_acc": 75.2,
      "dn_acc": 72.0,
-     "up_gain": 20.5,
-     "dn_gain": 22.6,
+     "up_gain": 20.4,
+     "dn_gain": 22.8,
      "band_cover": 73.6
     }
    },
@@ -2952,15 +2952,15 @@
    "kind": "morning",
    "prev_close": 778000,
    "pred": {
-    "open": 831000,
-    "high": 850000,
+    "open": 830000,
+    "high": 851000,
     "low": 794000
    },
    "pred_pct": {
-    "open": 6.75,
-    "high": 9.302,
-    "low": 2.086,
-    "close": 5.337
+    "open": 6.729,
+    "high": 9.355,
+    "low": 2.091,
+    "close": 5.401
    },
    "drivers": [
     {
@@ -2977,7 +2977,7 @@
     },
     {
      "name": "나스닥 선물",
-     "ret": 6.601
+     "ret": 6.467
     },
     {
      "name": "공포지수(VIX)",
@@ -2985,7 +2985,7 @@
     },
     {
      "name": "원/달러 환율",
-     "ret": 0.487
+     "ret": 0.713
     }
    ],
    "stats": {
@@ -3831,12 +3831,12 @@
     "days": 250,
     "up_rate": 24.0,
     "dn_rate": 27.2,
-    "up_acc": 80.8,
-    "dn_acc": 80.4,
+    "up_acc": 81.2,
+    "dn_acc": 80.8,
     "up_gain": 23.9,
     "dn_gain": 31.9,
-    "band_cover": 76.8,
-    "mae_close": 1.724,
+    "band_cover": 76.4,
+    "mae_close": 1.723,
     "base_mae_close": 1.697,
     "without_morning": {
      "up_acc": 81.6,
@@ -3932,13 +3932,13 @@
    "pred": {
     "open": 258000,
     "high": 262500,
-    "low": 250500
+    "low": 250000
    },
    "pred_pct": {
-    "open": 4.339,
-    "high": 6.107,
-    "low": 1.119,
-    "close": 2.805
+    "open": 4.317,
+    "high": 6.099,
+    "low": 1.095,
+    "close": 2.798
    },
    "drivers": [
     {
@@ -3947,11 +3947,11 @@
     },
     {
      "name": "S&P500 선물",
-     "ret": 4.647
+     "ret": 4.571
     },
     {
      "name": "나스닥 선물",
-     "ret": 6.601
+     "ret": 6.467
     },
     {
      "name": "도요타",
@@ -3963,7 +3963,7 @@
     },
     {
      "name": "원/달러 환율",
-     "ret": 0.487
+     "ret": 0.713
     }
    ],
    "stats": {
@@ -4811,16 +4811,16 @@
     "dn_rate": 35.2,
     "up_acc": 82.4,
     "dn_acc": 79.2,
-    "up_gain": 17.9,
+    "up_gain": 18.0,
     "dn_gain": 37.1,
     "band_cover": 81.6,
     "mae_close": 1.216,
     "base_mae_close": 1.182,
     "without_morning": {
-     "up_acc": 83.2,
-     "dn_acc": 79.2,
+     "up_acc": 82.8,
+     "dn_acc": 79.6,
      "up_gain": 17.5,
-     "dn_gain": 37.6,
+     "dn_gain": 37.5,
      "band_cover": 82.4
     }
    },
@@ -5392,11 +5392,11 @@
    {
     "name": "WTI 유가",
     "unit": "달러",
-    "value": 80.31,
+    "value": 80.44,
     "date": "2026-11-23",
-    "chg": -3.67,
-    "chg_pct": -4.37,
-    "chg_20": -21.079,
+    "chg": -3.54,
+    "chg_pct": -4.215,
+    "chg_20": -20.951,
     "history": [
      [
       "06/04",
@@ -5876,18 +5876,18 @@
      ],
      [
       "11/23",
-      80.31
+      80.44
      ]
     ]
    },
    {
     "name": "브렌트 유가",
     "unit": "달러",
-    "value": 86.79,
+    "value": 86.81,
     "date": "2026-11-23",
-    "chg": -5.78,
-    "chg_pct": -6.244,
-    "chg_20": -25.058,
+    "chg": -5.76,
+    "chg_pct": -6.222,
+    "chg_20": -25.041,
     "history": [
      [
       "06/04",
@@ -6367,7 +6367,7 @@
      ],
      [
       "11/23",
-      86.79
+      86.81
      ]
     ]
    }
