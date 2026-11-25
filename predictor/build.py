@@ -1174,6 +1174,13 @@ def main():
           + " · ".join(f"{x['name']} {x['value']}{x['unit']}" for x in ref["items"]))
     OUT.write_text(json.dumps(dict(generated_at=now.strftime("%Y-%m-%d %H:%M"), assets=results, ref=ref),
                               ensure_ascii=False, indent=1), encoding="utf-8")
+    try:  # 인스타그램용 카드 (site/cards/morning.png, result.png)
+        import cards
+        made = cards.make(log, results, now.strftime("%Y-%m-%d"))
+        if made:
+            print("인스타 카드 생성:", ", ".join(made))
+    except Exception as e:  # noqa: BLE001
+        print("인스타 카드 생성 실패:", str(e)[:120])
     print("\n저장 완료")
 
 

@@ -47,6 +47,9 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      - name: 한글 글꼴 설치 (인스타 카드용)
+        run: sudo apt-get install -y -qq fonts-noto-cjk > /dev/null
+
       # KRX 원본(VKOSPI)은 약관상 공개 저장소에 올리면 안 돼서, GitHub 내부 캐시(비공개)에만 보관해요.
       - name: KRX 자료 캐시 불러오기
         uses: actions/cache/restore@v4
