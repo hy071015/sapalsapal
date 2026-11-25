@@ -640,6 +640,7 @@ const INFO = {
       <li>분봉 차트는 15:30 종가까지 나와요. 단, 코스피200 지수의 2026-11-23 이전 날짜는 15:00까지만 있어요.</li>
       <li>코스피200은 실제 코스피200 지수로 계산해요.</li>
       <li>데이터 제공처 사정이나 휴장일 등으로 업데이트가 늦어지거나 빠질 수 있어요.</li>
+      <li>방문 통계는 Cloudflare Web Analytics로 집계해요. 쿠키를 쓰지 않고, 개인을 알아볼 수 있는 정보는 모으지 않아요.</li>
     </ul>`],
   faq: ["자주 묻는 질문", `
     <div class="q">왜 장 시작 전에는 예측이 없나요?</div>
@@ -1121,5 +1122,6 @@ fetch("data.json?t=" + Date.now())
 
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => DATA && renderDetail());
 </script>
+<!-- Cloudflare Web Analytics (쿠키 없이 방문 수만 집계) --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "55f1c274ae1f44a8b2efd8fc8debf4d4"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
