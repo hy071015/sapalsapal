@@ -101,6 +101,13 @@ h1.logo .logo-text { color: var(--text); }
 @media (max-width: 760px) { .about-grid { grid-template-columns: minmax(0, 1fr); gap: 10px; } }
 .dhead { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; align-items: center; }
 .dhead h2 { margin: 0; font-size: 20px; }
+.share-btn { background: var(--soft); color: var(--text); border: 1px solid var(--line); border-radius: 999px;
+  padding: 5px 14px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.share-btn:hover { border-color: var(--accent); }
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); background: var(--text); color: var(--bg);
+  padding: 10px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; opacity: 0; pointer-events: none;
+  transition: opacity .2s, transform .2s; z-index: 50; max-width: calc(100% - 32px); }
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
 .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: var(--soft); }
 .badge.ready { color: var(--ok); } .badge.wait { color: var(--warn); }
 
@@ -554,6 +561,36 @@ function expiryHtml(a) {
     ${a.note ? `<div class="note">※ ${a.note}</div>` : ""}`;
 }
 
+/* ── 공유하기: 휴대폰은 공유 창(카톡·문자 등), PC는 복사 ── */
+function sharePrediction(a, b) {
+  const d = a.decimals, url = "https://sapalsapal.com";
+  let text;
+  if (b.phase === "open") {
+    const o = b.o, day = a.today.date.slice(5).replace("-", "/");
+    text = `[사팔사팔] ${a.name} ${day} 9:30 예측
+시작가 ${fmt(o.open, d)} · 상방 ${fmt(o.high, d)} · 하방 ${fmt(o.low, d)}`;
+    if (b.actual) text += `
+실제 고가 ${fmt(b.actual.high, d)} · 저가 ${fmt(b.actual.low, d)} · 종가 ${fmt(b.actual.close, d)}`;
+  } else {
+    text = `[사팔사팔] ${a.name} 오늘 고가·저가 AI 예측은 매일 9:30에 공개돼요`;
+  }
+  if (navigator.share) {
+    navigator.share({ title: "사팔사팔", text, url }).catch(() => {});
+    return;
+  }
+  const all = `${text}
+${url}`;
+  (navigator.clipboard ? navigator.clipboard.writeText(all) : Promise.reject())
+    .then(() => toast("복사했어요! 카톡이나 메신저에 붙여넣기 하세요"))
+    .catch(() => window.prompt("아래 내용을 복사하세요", all));
+}
+function toast(msg) {
+  let t = document.getElementById("toast");
+  if (!t) { t = document.createElement("div"); t.id = "toast"; t.className = "toast"; document.body.appendChild(t); }
+  t.textContent = msg; t.classList.add("on");
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("on"), 2200);
+}
+
 /* ── 하단 안내 팝업 ── */
 const INFO = {
   about: ["사이트 소개", `
@@ -873,10 +910,12 @@ function renderDetail() {
   }
 
   $("#detail").innerHTML = `
-    <div class="dhead"><h2>${a.name} · ${dayName(b.phase === "open" ? a.today.date : a.target_date)}</h2></div>
+    <div class="dhead"><h2>${a.name} · ${dayName(b.phase === "open" ? a.today.date : a.target_date)}</h2>
+      <button class="share-btn" id="shareBtn" aria-label="오늘 예측 공유하기">공유하기</button></div>
     ${morning}
     ${afternoon}
     ${actual}`;
+  $("#shareBtn").onclick = () => sharePrediction(a, b);
 
   // 별도 위젯: 사팔사팔 AI의 과거 예측은?
   $("#past").innerHTML = `
