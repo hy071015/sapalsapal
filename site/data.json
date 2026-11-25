@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-25 17:39",
+ "generated_at": "2026-11-25 17:56",
  "assets": [
   {
    "id": "kospi200",
@@ -916,21 +916,21 @@
    },
    "mid_stats": {
     "days": 250,
-    "up_rate": 32.0,
-    "dn_rate": 34.8,
+    "up_rate": 31.6,
+    "dn_rate": 34.4,
     "up_acc": 79.6,
-    "dn_acc": 76.0,
-    "up_gain": 36.3,
-    "dn_gain": 29.1,
-    "band_cover": 72.8,
-    "mae_close": 1.144,
-    "base_mae_close": 1.109,
+    "dn_acc": 76.4,
+    "up_gain": 36.0,
+    "dn_gain": 28.8,
+    "band_cover": 73.2,
+    "mae_close": 1.115,
+    "base_mae_close": 1.078,
     "without_morning": {
      "up_acc": 79.6,
-     "dn_acc": 77.2,
-     "up_gain": 37.1,
-     "dn_gain": 29.3,
-     "band_cover": 72.8
+     "dn_acc": 77.6,
+     "up_gain": 36.7,
+     "dn_gain": 29.4,
+     "band_cover": 72.0
     }
    },
    "open_stats": {
@@ -5662,11 +5662,11 @@
    {
     "name": "WTI 유가",
     "unit": "달러",
-    "value": 80.29,
+    "value": 80.9,
     "date": "2026-11-25",
-    "chg": -1.76,
-    "chg_pct": -2.145,
-    "chg_20": -21.882,
+    "chg": -1.15,
+    "chg_pct": -1.402,
+    "chg_20": -21.288,
     "history": [
      [
       "06/08",
@@ -6146,18 +6146,18 @@
      ],
      [
       "11/25",
-      80.29
+      80.9
      ]
     ]
    },
    {
     "name": "브렌트 유가",
     "unit": "달러",
-    "value": 87.19,
+    "value": 87.73,
     "date": "2026-11-25",
-    "chg": -4.21,
-    "chg_pct": -4.606,
-    "chg_20": -24.393,
+    "chg": -3.67,
+    "chg_pct": -4.015,
+    "chg_20": -23.925,
     "history": [
      [
       "06/08",
@@ -6637,7 +6637,7 @@
      ],
      [
       "11/25",
-      87.19
+      87.73
      ]
     ]
    }
@@ -6674,12 +6674,12 @@
     },
     {
      "name": "원화 흐름",
-     "score": 29.3,
+     "score": 28.9,
      "desc": "최근 20일 원/달러 (원화 약세일수록 공포)"
     },
     {
      "name": "글로벌 위험선호",
-     "score": 2.0,
+     "score": 2.4,
      "desc": "미국 VIX 수준 (높을수록 공포)"
     }
    ],
