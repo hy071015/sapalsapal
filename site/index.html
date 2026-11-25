@@ -104,6 +104,8 @@ h1.logo .logo-text { color: var(--text); }
 .share-btn { background: var(--soft); color: var(--text); border: 1px solid var(--line); border-radius: 999px;
   padding: 5px 14px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
 .share-btn:hover { border-color: var(--accent); }
+.share-btn { display: inline-flex; align-items: center; gap: 6px; }
+.share-btn svg { width: 15px; height: 15px; flex: none; }
 .toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); background: var(--text); color: var(--bg);
   padding: 10px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; opacity: 0; pointer-events: none;
   transition: opacity .2s, transform .2s; z-index: 50; max-width: calc(100% - 32px); }
@@ -911,7 +913,7 @@ function renderDetail() {
 
   $("#detail").innerHTML = `
     <div class="dhead"><h2>${a.name} · ${dayName(b.phase === "open" ? a.today.date : a.target_date)}</h2>
-      <button class="share-btn" id="shareBtn" aria-label="오늘 예측 공유하기">공유하기</button></div>
+      <button class="share-btn" id="shareBtn" aria-label="오늘 예측 공유하기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3m0 0L7.5 7.5M12 3l4.5 4.5M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>공유하기</button></div>
     ${morning}
     ${afternoon}
     ${actual}`;
