@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-25 17:56",
+ "generated_at": "2026-11-25 19:40",
  "assets": [
   {
    "id": "kospi200",
@@ -916,21 +916,21 @@
    },
    "mid_stats": {
     "days": 250,
-    "up_rate": 31.6,
-    "dn_rate": 34.4,
+    "up_rate": 32.0,
+    "dn_rate": 34.8,
     "up_acc": 79.6,
-    "dn_acc": 76.4,
-    "up_gain": 36.0,
-    "dn_gain": 28.8,
-    "band_cover": 73.2,
-    "mae_close": 1.115,
-    "base_mae_close": 1.078,
+    "dn_acc": 76.0,
+    "up_gain": 36.3,
+    "dn_gain": 29.1,
+    "band_cover": 72.8,
+    "mae_close": 1.144,
+    "base_mae_close": 1.109,
     "without_morning": {
      "up_acc": 79.6,
-     "dn_acc": 77.6,
-     "up_gain": 36.7,
-     "dn_gain": 29.4,
-     "band_cover": 72.0
+     "dn_acc": 77.2,
+     "up_gain": 37.1,
+     "dn_gain": 29.3,
+     "band_cover": 72.8
     }
    },
    "open_stats": {
@@ -996,36 +996,51 @@
      "label": "월요일 위클리 만기",
      "date": "2026-11-30",
      "days": 3,
+     "method": "VKOSPI(한국거래소 통계정보) 기반",
      "low": 671.78,
      "high": 779.87,
      "low_pct": -7.188,
      "high_pct": 7.745,
      "cover": 79.6,
-     "method": "VKOSPI(한국거래소 통계정보) 기반"
+     "low50": 695.45,
+     "high50": 753.33,
+     "low50_pct": -3.918,
+     "high50_pct": 4.078,
+     "cover50": 42.4
     },
     {
      "key": "weekly_thu",
      "label": "목요일 위클리 만기",
      "date": "2026-11-26",
      "days": 1,
+     "method": "VKOSPI(한국거래소 통계정보) 기반",
      "low": 692.45,
      "high": 756.6,
      "low_pct": -4.333,
      "high_pct": 4.53,
      "cover": 74.4,
-     "method": "VKOSPI(한국거래소 통계정보) 기반"
+     "low50": 707.7,
+     "high50": 740.28,
+     "low50_pct": -2.225,
+     "high50_pct": 2.276,
+     "cover50": 47.2
     },
     {
      "key": "monthly",
      "label": "이번 달 월물 만기",
      "date": "2026-12-10",
      "days": 11,
+     "method": "VKOSPI(한국거래소 통계정보) 기반",
      "low": 624.25,
      "high": 839.25,
      "low_pct": -13.755,
      "high_pct": 15.949,
      "cover": 76.8,
-     "method": "VKOSPI(한국거래소 통계정보) 기반"
+     "low50": 669.31,
+     "high50": 782.74,
+     "low50_pct": -7.529,
+     "high50_pct": 8.142,
+     "cover50": 46.4
     }
    ]
   },
@@ -2032,36 +2047,51 @@
      "label": "월요일 위클리 만기",
      "date": "2026-11-30",
      "days": 3,
+     "method": "최근 변동성 기반",
      "low": 152900,
      "high": 190600,
      "low_pct": -10.441,
      "high_pct": 11.659,
      "cover": 85.2,
-     "method": "최근 변동성 기반"
+     "low50": 161700,
+     "high50": 180200,
+     "low50_pct": -5.279,
+     "high50_pct": 5.574,
+     "cover50": 48.4
     },
     {
      "key": "weekly_thu",
      "label": "목요일 위클리 만기",
      "date": "2026-11-26",
      "days": 1,
+     "method": "최근 변동성 기반",
      "low": 160400,
      "high": 181600,
      "low_pct": -6.026,
      "high_pct": 6.412,
      "cover": 77.2,
-     "method": "최근 변동성 기반"
+     "low50": 165800,
+     "high50": 175700,
+     "low50_pct": -2.867,
+     "high50_pct": 2.952,
+     "cover50": 49.2
     },
     {
      "key": "monthly",
      "label": "이번 달 월물 만기",
      "date": "2026-12-10",
      "days": 11,
+     "method": "최근 변동성 기반",
      "low": 138100,
      "high": 211000,
      "low_pct": -19.126,
      "high_pct": 23.65,
      "cover": 78.4,
-     "method": "최근 변동성 기반"
+     "low50": 154100,
+     "high50": 189100,
+     "low50_pct": -9.737,
+     "high50_pct": 10.787,
+     "cover50": 49.6
     }
    ]
   },
@@ -3068,36 +3098,51 @@
      "label": "월요일 위클리 만기",
      "date": "2026-11-30",
      "days": 3,
+     "method": "최근 변동성 기반",
      "low": 902000,
      "high": 1176000,
      "low_pct": -12.443,
      "high_pct": 14.212,
      "cover": 80.0,
-     "method": "최근 변동성 기반"
+     "low50": 965000,
+     "high50": 1100000,
+     "low50_pct": -6.357,
+     "high50_pct": 6.788,
+     "cover50": 52.4
     },
     {
      "key": "weekly_thu",
      "label": "목요일 위클리 만기",
      "date": "2026-11-26",
      "days": 1,
+     "method": "최근 변동성 기반",
      "low": 955000,
      "high": 1111000,
      "low_pct": -7.276,
      "high_pct": 7.847,
      "cover": 77.2,
-     "method": "최근 변동성 기반"
+     "low50": 991000,
+     "high50": 1070000,
+     "low50_pct": -3.768,
+     "high50_pct": 3.915,
+     "cover50": 52.8
     },
     {
      "key": "monthly",
      "label": "이번 달 월물 만기",
      "date": "2026-12-10",
      "days": 11,
+     "method": "최근 변동성 기반",
      "low": 795000,
      "high": 1335000,
      "low_pct": -22.818,
      "high_pct": 29.564,
      "cover": 78.4,
-     "method": "최근 변동성 기반"
+     "low50": 905000,
+     "high50": 1172000,
+     "low50_pct": -12.144,
+     "high50_pct": 13.823,
+     "cover50": 43.2
     }
    ]
   },
@@ -4100,36 +4145,51 @@
      "label": "월요일 위클리 만기",
      "date": "2026-11-30",
      "days": 3,
+     "method": "최근 변동성 기반",
      "low": 641000,
      "high": 889000,
      "low_pct": -15.045,
      "high_pct": 17.709,
      "cover": 74.4,
-     "method": "최근 변동성 기반"
+     "low50": 700000,
+     "high50": 815000,
+     "low50_pct": -7.331,
+     "high50_pct": 7.911,
+     "cover50": 45.6
     },
     {
      "key": "weekly_thu",
      "label": "목요일 위클리 만기",
      "date": "2026-11-26",
      "days": 1,
+     "method": "최근 변동성 기반",
      "low": 688000,
      "high": 828000,
      "low_pct": -8.862,
      "high_pct": 9.724,
      "cover": 75.2,
-     "method": "최근 변동성 기반"
+     "low50": 723000,
+     "high50": 788000,
+     "low50_pct": -4.205,
+     "high50_pct": 4.389,
+     "cover50": 47.6
     },
     {
      "key": "monthly",
      "label": "이번 달 월물 만기",
      "date": "2026-12-10",
      "days": 11,
+     "method": "최근 변동성 기반",
      "low": 548000,
      "high": 1040000,
      "low_pct": -27.391,
      "high_pct": 37.724,
      "cover": 61.6,
-     "method": "최근 변동성 기반"
+     "low50": 648000,
+     "high50": 880000,
+     "low50_pct": -14.228,
+     "high50_pct": 16.589,
+     "cover50": 42.8
     }
    ]
   },
@@ -5132,36 +5192,51 @@
      "label": "월요일 위클리 만기",
      "date": "2026-11-30",
      "days": 3,
+     "method": "최근 변동성 기반",
      "low": 249000,
      "high": 291500,
      "low_pct": -7.609,
      "high_pct": 8.236,
      "cover": 81.2,
-     "method": "최근 변동성 기반"
+     "low50": 259500,
+     "high50": 280000,
+     "low50_pct": -3.676,
+     "high50_pct": 3.816,
+     "cover50": 48.8
     },
     {
      "key": "weekly_thu",
      "label": "목요일 위클리 만기",
      "date": "2026-11-26",
      "days": 1,
+     "method": "최근 변동성 기반",
      "low": 258000,
      "high": 281500,
      "low_pct": -4.207,
      "high_pct": 4.392,
      "cover": 79.6,
-     "method": "최근 변동성 기반"
+     "low50": 264000,
+     "high50": 275000,
+     "low50_pct": -2.05,
+     "high50_pct": 2.093,
+     "cover50": 49.6
     },
     {
      "key": "monthly",
      "label": "이번 달 월물 만기",
      "date": "2026-12-10",
      "days": 11,
+     "method": "최근 변동성 기반",
      "low": 231500,
      "high": 313500,
      "low_pct": -14.062,
      "high_pct": 16.363,
      "cover": 72.8,
-     "method": "최근 변동성 기반"
+     "low50": 250000,
+     "high50": 290500,
+     "low50_pct": -7.228,
+     "high50_pct": 7.791,
+     "cover50": 42.4
     }
    ]
   }
@@ -5662,11 +5737,11 @@
    {
     "name": "WTI 유가",
     "unit": "달러",
-    "value": 80.9,
+    "value": 81.35,
     "date": "2026-11-25",
-    "chg": -1.15,
-    "chg_pct": -1.402,
-    "chg_20": -21.288,
+    "chg": -0.7,
+    "chg_pct": -0.853,
+    "chg_20": -20.85,
     "history": [
      [
       "06/08",
@@ -6146,18 +6221,18 @@
      ],
      [
       "11/25",
-      80.9
+      81.35
      ]
     ]
    },
    {
     "name": "브렌트 유가",
     "unit": "달러",
-    "value": 87.73,
+    "value": 88.01,
     "date": "2026-11-25",
-    "chg": -3.67,
-    "chg_pct": -4.015,
-    "chg_20": -23.925,
+    "chg": -3.39,
+    "chg_pct": -3.709,
+    "chg_20": -23.682,
     "history": [
      [
       "06/08",
@@ -6637,7 +6712,7 @@
      ],
      [
       "11/25",
-      87.73
+      88.01
      ]
     ]
    }
@@ -6650,7 +6725,7 @@
    "date": "2026-11-24"
   },
   "fear_greed": {
-   "score": 17.3,
+   "score": 17.4,
    "label": "극단적 공포",
    "date": "2026-11-25",
    "prev": 19.0,
@@ -6674,12 +6749,12 @@
     },
     {
      "name": "원화 흐름",
-     "score": 28.9,
+     "score": 30.5,
      "desc": "최근 20일 원/달러 (원화 약세일수록 공포)"
     },
     {
      "name": "글로벌 위험선호",
-     "score": 2.4,
+     "score": 1.6,
      "desc": "미국 VIX 수준 (높을수록 공포)"
     }
    ],
@@ -7162,7 +7237,7 @@
     ],
     [
      "11/25",
-     17.3
+     17.4
     ]
    ],
    "kospi": [
