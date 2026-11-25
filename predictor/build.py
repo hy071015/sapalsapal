@@ -565,15 +565,17 @@ def expiry_ranges(kr: pd.DataFrame, lv, vk_vol: pd.Series | None = None) -> list
         z = z[z.index > z.index[0] + pd.Timedelta(days=60)]  # 변동성 추정이 안정된 뒤부터
         # 과거 상승장·하락장의 '추세'가 섞이지 않도록 위아래를 같은 폭으로 잡아요 (현재가 중심)
         calib, test = z.iloc[:-STAT_DAYS].abs(), z.iloc[-STAT_DAYS:].abs()
-        k_level = RANGE_Q[1] - RANGE_Q[0]
-        cover = float((test <= calib.quantile(k_level)).mean()) * 100  # 최근 1년 실제 적중률
-        k = float(z.abs().quantile(k_level))                          # 발표용은 전체 기간으로
         s = float(vol.iloc[-1] * np.sqrt(n))
         c = float(close.iloc[-1])
-        lo, hi = c * np.exp(-k * s), c * np.exp(k * s)
-        out.append(dict(key=key, label=label, date=exp.strftime("%Y-%m-%d"), days=n,
-                        low=lv(lo), high=lv(hi), low_pct=pct(lo / c - 1), high_pct=pct(hi / c - 1),
-                        cover=round(cover, 1), method=method))
+        row = dict(key=key, label=label, date=exp.strftime("%Y-%m-%d"), days=n, method=method)
+        # 80% 범위(넓게)와 50% 범위(반반 확률, 만기일 가격이 있을 법한 곳). 2026-11-25: 한 점 예측은 '지금 가격'을 못 이겨서 범위로
+        for lvl, sfx in ((RANGE_Q[1] - RANGE_Q[0], ""), (0.5, "50")):
+            cover = float((test <= calib.quantile(lvl)).mean()) * 100  # 최근 1년 실제 적중률
+            k = float(z.abs().quantile(lvl))                          # 발표용은 전체 기간으로
+            lo, hi = c * np.exp(-k * s), c * np.exp(k * s)
+            row.update({f"low{sfx}": lv(lo), f"high{sfx}": lv(hi), f"low{sfx}_pct": pct(lo / c - 1),
+                        f"high{sfx}_pct": pct(hi / c - 1), f"cover{sfx}": round(cover, 1)})
+        out.append(row)
     return out
 
 

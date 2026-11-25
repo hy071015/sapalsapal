@@ -166,6 +166,9 @@ h1.logo .logo-text { color: var(--text); }
 .exp-v span { display: block; font-size: 12px; font-weight: 500; }
 .exp-v .r { text-align: right; }
 .exp .s { font-size: 11px; color: var(--muted); margin-top: 8px; }
+.exp .track .seg80 { opacity: .3; }
+.exp-v2 { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.exp-v2 b { color: var(--text); font-weight: 600; }
 .surprise { font-size: 13px; }
 /* 이벤트 달력 */
 :root { --ev-w: #8b95a7; --ev-m: #f08c2e; --ev-q: #e5383b; --ev-h: #9aa3ae; --ev-fomc: #8b5cf6; --ev-cpi: #0ea5a4; --ev-bok: #16a34a; }
@@ -517,25 +520,37 @@ function expiryHtml(a) {
   const d = a.decimals;
   const all = a.expiry.flatMap((x) => [x.low, x.high]).concat(a.prev_close);
   const x = scaleOf(all);
+  const has50 = a.expiry.every((e) => e.low50 != null);
   return `
     <div class="dhead">
-      <h2>${a.name} · 만기까지 예상 범위</h2>
-      <span class="badge">80% 확률 범위</span>
+      <h2>${a.name} · 만기일 예상 범위</h2>
+      <span class="badge">${has50 ? "50% · 80% 확률 범위" : "80% 확률 범위"}</span>
     </div>
-    <div class="small" style="margin-top:6px">기준가 ${fmt(a.prev_close, d)} (${a.prev_date} 종가) · 각 만기일 장 마감 가격이 들어올 것으로 보이는 범위예요. 막대의 검은 선이 기준가예요.</div>
+    <div class="small" style="margin-top:6px">기준가 ${fmt(a.prev_close, d)} (${a.prev_date} 종가) · 각 만기일 장 마감 가격이 들어올 것으로 보이는 범위예요.
+      ${has50 ? "진한 막대 = 50% 범위(반반 확률), 옅은 막대 = 80% 범위, " : ""}검은 선 = 기준가.</div>
     <div class="exp-list">${a.expiry.map((e) => `
       <div class="exp">
         <div class="exp-h"><b>${e.label}</b><span class="small">${dayName(e.date)} · ${e.days}거래일 남음</span></div>
-        <div class="track"><div class="seg" style="left:${x(e.low)}%;right:${100 - x(e.high)}%"></div>
+        <div class="track">
+          <div class="seg${has50 ? " seg80" : ""}" style="left:${x(e.low)}%;right:${100 - x(e.high)}%"></div>
+          ${has50 ? `<div class="seg" style="left:${x(e.low50)}%;right:${100 - x(e.high50)}%"></div>` : ""}
           <div class="mk" style="left:${x(a.prev_close)}%"></div></div>
+        ${has50 ? `
+        <div class="exp-v">
+          <div class="down"><small>50% 하단</small>${fmt(e.low50, d)}<span>${sign(e.low50_pct)}</span></div>
+          <div class="up r"><small>50% 상단</small>${fmt(e.high50, d)}<span>${sign(e.high50_pct)}</span></div>
+        </div>
+        <div class="exp-v2"><span>80% 범위</span><b>${fmt(e.low, d)} ~ ${fmt(e.high, d)}</b></div>
+        <div class="s">최근 1년 실제 적중률: 50% 범위 ${e.cover50}% · 80% 범위 ${e.cover}%</div>` : `
         <div class="exp-v">
           <div class="down"><small>하단</small>${fmt(e.low, d)}<span>${sign(e.low_pct)}</span></div>
           <div class="up r"><small>상단</small>${fmt(e.high, d)}<span>${sign(e.high_pct)}</span></div>
         </div>
-        <div class="s">최근 1년 실제 적중률 ${e.cover}% (목표 80%)</div>
+        <div class="s">최근 1년 실제 적중률 ${e.cover}% (목표 80%)</div>`}
       </div>`).join("")}
     </div>
-    <div class="note">※ 지금은 최근 변동성과 과거 움직임의 분포로 계산해요. 코스피200 위클리·월물 옵션 가격(시장이 예상하는 변동폭)을 연결하면 더 정확한 방식으로 바뀔 예정이에요.${a.id !== "kospi200" ? " 개별 종목도 코스피200 옵션 만기일을 기준으로 보여드려요." : ""}</div>
+    <div class="note">※ ${a.id === "kospi200" ? "코스피200은 VKOSPI(한국거래소 통계정보)로" : "최근 변동성으로"} 만기까지 움직일 폭을 계산해요.
+      만기일 가격을 한 점으로 맞히는 방법(최대 고통 가격 등)도 3년치로 검증했지만 '지금 가격'보다 못 맞혀서, 확률 범위로 보여드려요.${a.id !== "kospi200" ? " 개별 종목도 코스피200 옵션 만기일을 기준으로 보여드려요." : ""}</div>
     ${a.note ? `<div class="note">※ ${a.note}</div>` : ""}`;
 }
 
