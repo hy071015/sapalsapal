@@ -138,6 +138,44 @@ def result_card(day, items, path):
     c.save(path)
 
 
+def reel_card(day, items, path):
+    """릴스·스토리용 세로 카드 (1080×1920): 9:30 예측과 실제 결과를 한 장에."""
+    global H
+    old_h, H = H, 1920
+    c = Canvas()
+    c.img = Image.new("RGB", (W * S, H * S), BG)
+    c.d = ImageDraw.Draw(c.img)
+    header(c, "9:30 예측 vs 실제", day)
+    c.text((56, 252), "시작가를 보고 9:30에 낸 예측, 장 마감 결과는? (KRX 정규장)", font("reg", 26), MUTED)
+    top, gap, bh = 320, 18, 282
+    for i, it in enumerate(items):
+        y = top + i * (bh + gap)
+        inside = it["band_low"] <= it["a_low"] and it["a_high"] <= it["band_high"]
+        c.rect((40, y, W - 40, y + bh), CARD, 26)
+        dec = it["decimals"]
+        cl = (it["a_close"] / it["prev_close"] - 1) * 100
+        c.text((76, y + 28), it["name"], font("bold", 42), TEXT)
+        c.text((W - 76, y + 34), f"종가 {fmt(it['a_close'], dec)}  {cl:+.2f}%", font("bold", 28),
+               UP if cl > 0 else DOWN if cl < 0 else MUTED, "ra")
+        c.text((76, y + 92), f"시작가 {fmt(it['open'], dec)}", font("reg", 24), MUTED)
+        if inside:
+            tx = W - 76 - c.d.textlength("최대 범위 안", font=font("reg", 22)) / S
+            c.text((W - 76, y + 94), "최대 범위 안", font("reg", 22), OK, "ra")
+            c.d.ellipse([(tx - 22) * S, (y + 103) * S, (tx - 8) * S, (y + 117) * S], fill=OK)
+        for j, (lab, col, pred, act) in enumerate((("상방 → 실제 고가", UP, it["high"], it["a_high"]),
+                                                    ("하방 → 실제 저가", DOWN, it["low"], it["a_low"]))):
+            x0 = 76 + j * 480
+            diff = (act / pred - 1) * 100
+            near = abs(diff) <= 0.3
+            c.text((x0, y + 142), lab, font("reg", 24), col)
+            c.text((x0, y + 178), f"{fmt(pred, dec)} → {fmt(act, dec)}", font("bold", 30), TEXT)
+            c.text((x0, y + 226), f"차이 {diff:+.2f}%" + ("  거의 적중" if near else ""), font("bold" if near else "reg", 22),
+                   OK if near else MUTED)
+    footer(c)
+    c.save(path)
+    H = old_h
+
+
 def make(log, assets, day):
     """build.py에서 호출. 오늘 9:30 예측이 있으면 오전 카드, 실제 결과까지 있으면 결과 카드."""
     rec = log.get(day, {})
@@ -158,7 +196,8 @@ def make(log, assets, day):
         made.append("오전")
     if len(r) == len(assets):
         result_card(day, r, OUT / "result.png")
-        made.append("결과")
+        reel_card(day, r, OUT / "reel.png")
+        made += ["결과", "릴스"]
     return made
 
 
