@@ -1586,6 +1586,19 @@
     "band_high": 766.75,
     "band_low": 668.16,
     "drivers": []
+   },
+   "midday": {
+    "at": "2026-11-27 13:54",
+    "m_open": 729.04,
+    "m_high": 748.7,
+    "m_low": 719.92,
+    "m_last": 746.36,
+    "band_high": 759.29,
+    "band_low": 717.22,
+    "close": 746.05,
+    "prob_up": 66,
+    "prob_dn": 2,
+    "s_open": 0.003
    }
   },
   "samsung": {
@@ -1610,6 +1623,19 @@
     "band_high": 178800,
     "band_low": 159300,
     "drivers": []
+   },
+   "midday": {
+    "at": "2026-11-27 13:54",
+    "m_open": 171200,
+    "m_high": 177500,
+    "m_low": 169000,
+    "m_last": 176800,
+    "band_high": 180600,
+    "band_low": 168600,
+    "close": 176600,
+    "prob_up": 56,
+    "prob_dn": 1,
+    "s_open": -0.712
    }
   },
   "hynix": {
@@ -1634,6 +1660,19 @@
     "band_high": 1093000,
     "band_low": 913000,
     "drivers": []
+   },
+   "midday": {
+    "at": "2026-11-27 13:54",
+    "m_open": 1040000,
+    "m_high": 1085000,
+    "m_low": 1022000,
+    "m_last": 1080000,
+    "band_high": 1115000,
+    "band_low": 1018000,
+    "close": 1077000,
+    "prob_up": 56,
+    "prob_dn": 3,
+    "s_open": -1.821
    }
   },
   "semco": {
@@ -1658,6 +1697,19 @@
     "band_high": 826000,
     "band_low": 653000,
     "drivers": []
+   },
+   "midday": {
+    "at": "2026-11-27 13:54",
+    "m_open": 776000,
+    "m_high": 803000,
+    "m_low": 754000,
+    "m_last": 800000,
+    "band_high": 820000,
+    "band_low": 750000,
+    "close": 797000,
+    "prob_up": 70,
+    "prob_dn": 1,
+    "s_open": -2.138
    }
   },
   "hyundai": {
@@ -1682,6 +1734,19 @@
     "band_high": 284500,
     "band_low": 244500,
     "drivers": []
+   },
+   "midday": {
+    "at": "2026-11-27 13:54",
+    "m_open": 260000,
+    "m_high": 268000,
+    "m_low": 259500,
+    "m_last": 266500,
+    "band_high": 272000,
+    "band_low": 258500,
+    "close": 266500,
+    "prob_up": 52,
+    "prob_dn": 3,
+    "s_open": 0.047
    }
   }
  }
