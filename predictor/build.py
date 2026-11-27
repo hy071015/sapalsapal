@@ -941,7 +941,9 @@ def run_asset(a, daily, intra, now, log, mode, bars5, vk=None, kis=None):
     # 점심 보정
     midday, mid_stats = None, None
     if a["ticker"] in intra:
-        mt = log.get(today_key, {}).get(a["id"], {}).get("morning")
+        rec_today = log.get(today_key, {}).get(a["id"], {})
+        # 아침 예측이 없으면(미국 휴장 다음 날 등, 2026-11-27 추수감사절) 전날 저녁 예측으로 대신
+        mt = rec_today.get("morning") or rec_today.get("evening")
         morning_today = None
         if mt:
             morning_today = dict(p_gap=mt["pct"]["open"] / 100, p_hi=mt["pct"]["high"] / 100, p_lo=mt["pct"]["low"] / 100)
