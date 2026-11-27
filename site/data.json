@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-27 08:39",
+ "generated_at": "2026-11-27 09:13",
  "assets": [
   {
    "id": "kospi200",
@@ -855,20 +855,20 @@
    "mid_stats": {
     "days": 250,
     "up_rate": 31.6,
-    "dn_rate": 34.8,
-    "up_acc": 78.8,
-    "dn_acc": 76.8,
-    "up_gain": 36.2,
-    "dn_gain": 29.4,
-    "band_cover": 74.0,
-    "mae_close": 1.112,
-    "base_mae_close": 1.075,
+    "dn_rate": 35.2,
+    "up_acc": 79.2,
+    "dn_acc": 78.4,
+    "up_gain": 35.8,
+    "dn_gain": 30.0,
+    "band_cover": 73.2,
+    "mae_close": 1.143,
+    "base_mae_close": 1.107,
     "without_morning": {
-     "up_acc": 79.2,
-     "dn_acc": 77.6,
-     "up_gain": 36.9,
-     "dn_gain": 29.5,
-     "band_cover": 73.2
+     "up_acc": 79.6,
+     "dn_acc": 78.0,
+     "up_gain": 36.4,
+     "dn_gain": 29.8,
+     "band_cover": 73.6
     }
    },
    "open_stats": {
@@ -1012,10 +1012,10 @@
     "low": 168900
    },
    "pred_pct": {
-    "open": 0.654,
-    "high": 2.47,
+    "open": 0.655,
+    "high": 2.471,
     "low": -1.396,
-    "close": 0.472
+    "close": 0.471
    },
    "drivers": [],
    "stats": {
@@ -1024,7 +1024,7 @@
     "end": "2026-11-26",
     "mae_high": 2.373,
     "mae_low": 2.564,
-    "mae_open": 2.118,
+    "mae_open": 2.117,
     "base_mae_high": 2.968,
     "base_mae_low": 3.165,
     "improve": 19.5,
@@ -1850,17 +1850,17 @@
     "up_rate": 26.4,
     "dn_rate": 35.6,
     "up_acc": 77.6,
-    "dn_acc": 75.2,
+    "dn_acc": 74.8,
     "up_gain": 22.4,
     "dn_gain": 26.1,
-    "band_cover": 74.4,
-    "mae_close": 1.396,
+    "band_cover": 74.8,
+    "mae_close": 1.395,
     "base_mae_close": 1.376,
     "without_morning": {
      "up_acc": 77.2,
      "dn_acc": 74.0,
      "up_gain": 23.0,
-     "dn_gain": 25.7,
+     "dn_gain": 25.6,
      "band_cover": 74.0
     }
    },
@@ -2844,16 +2844,16 @@
     "dn_rate": 34.4,
     "up_acc": 76.8,
     "dn_acc": 73.6,
-    "up_gain": 24.5,
-    "dn_gain": 24.1,
+    "up_gain": 24.6,
+    "dn_gain": 24.2,
     "band_cover": 74.8,
-    "mae_close": 1.845,
+    "mae_close": 1.846,
     "base_mae_close": 1.831,
     "without_morning": {
      "up_acc": 76.4,
      "dn_acc": 72.0,
-     "up_gain": 21.5,
-     "dn_gain": 22.8,
+     "up_gain": 21.6,
+     "dn_gain": 22.9,
      "band_cover": 74.0
     }
    },
@@ -2999,9 +2999,9 @@
    },
    "pred_pct": {
     "open": 1.118,
-    "high": 4.361,
-    "low": -2.872,
-    "close": 0.449
+    "high": 4.364,
+    "low": -2.871,
+    "close": 0.452
    },
    "drivers": [],
    "stats": {
@@ -3013,7 +3013,7 @@
     "mae_open": 2.594,
     "base_mae_high": 4.048,
     "base_mae_low": 3.74,
-    "improve": 12.1,
+    "improve": 12.2,
     "dir_acc": 63.2,
     "in_range": 48.4,
     "base_mae_open": 3.191,
@@ -3836,17 +3836,17 @@
     "up_rate": 23.6,
     "dn_rate": 27.2,
     "up_acc": 81.2,
-    "dn_acc": 80.4,
+    "dn_acc": 80.8,
     "up_gain": 24.0,
     "dn_gain": 32.2,
     "band_cover": 76.4,
-    "mae_close": 1.739,
+    "mae_close": 1.738,
     "base_mae_close": 1.709,
     "without_morning": {
      "up_acc": 82.0,
      "dn_acc": 82.4,
      "up_gain": 24.4,
-     "dn_gain": 35.1,
+     "dn_gain": 35.2,
      "band_cover": 76.0
     }
    },
@@ -3856,7 +3856,7 @@
     "end": "2026-11-26",
     "mae_high": 0.962,
     "mae_low": 2.119,
-    "morning_mae_high": 3.448,
+    "morning_mae_high": 3.447,
     "morning_mae_low": 4.153,
     "base_mae_high": 1.983,
     "base_mae_low": 2.845,
@@ -3928,13 +3928,13 @@
      "method": "최근 변동성 기반",
      "low": 689000,
      "high": 892000,
-     "low_pct": -12.151,
-     "high_pct": 13.831,
-     "cover": 75.6,
+     "low_pct": -12.136,
+     "high_pct": 13.812,
+     "cover": 75.2,
      "low50": 738000,
      "high50": 833000,
-     "low50_pct": -5.877,
-     "high50_pct": 6.244,
+     "low50_pct": -5.872,
+     "high50_pct": 6.238,
      "cover50": 46.4
     },
     {
@@ -3993,7 +3993,7 @@
    "pred_pct": {
     "open": 0.339,
     "high": 3.022,
-    "low": -2.413,
+    "low": -2.412,
     "close": 0.183
    },
    "drivers": [],
@@ -4828,18 +4828,18 @@
     "days": 250,
     "up_rate": 20.0,
     "dn_rate": 35.6,
-    "up_acc": 82.0,
+    "up_acc": 82.4,
     "dn_acc": 80.0,
     "up_gain": 19.5,
-    "dn_gain": 36.9,
+    "dn_gain": 37.0,
     "band_cover": 81.6,
     "mae_close": 1.219,
     "base_mae_close": 1.19,
     "without_morning": {
      "up_acc": 82.4,
-     "dn_acc": 79.2,
+     "dn_acc": 79.6,
      "up_gain": 19.0,
-     "dn_gain": 37.3,
+     "dn_gain": 37.4,
      "band_cover": 81.6
     }
    },
@@ -5463,11 +5463,11 @@
    {
     "name": "WTI 유가",
     "unit": "달러",
-    "value": 84.87,
+    "value": 85.04,
     "date": "2026-11-26",
-    "chg": 1.19,
-    "chg_pct": 1.422,
-    "chg_20": -16.794,
+    "chg": 1.36,
+    "chg_pct": 1.625,
+    "chg_20": -16.627,
     "history": [
      [
       "06/09",
@@ -5947,18 +5947,18 @@
      ],
      [
       "11/26",
-      84.87
+      85.04
      ]
     ]
    },
    {
     "name": "브렌트 유가",
     "unit": "달러",
-    "value": 91.64,
+    "value": 91.75,
     "date": "2026-11-26",
-    "chg": -2.97,
-    "chg_pct": -3.139,
-    "chg_20": -20.23,
+    "chg": -2.86,
+    "chg_pct": -3.023,
+    "chg_20": -20.134,
     "history": [
      [
       "06/09",
@@ -6438,7 +6438,7 @@
      ],
      [
       "11/26",
-      91.64
+      91.75
      ]
     ]
    }
